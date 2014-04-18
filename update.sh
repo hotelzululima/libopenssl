@@ -132,11 +132,12 @@ copy_crypt ecdh "ech_lib.c ech_ossl.c ech_key.c ech_err.c ech_locl.h"
 copy_crypt ecdsa "ecs_lib.c ecs_asn1.c ecs_ossl.c ecs_sign.c ecs_vrf.c
 	ecs_err.c ecs_locl.h"
 
-copy_crypt engine "eng_err.c eng_lib.c eng_list.c eng_init.c eng_ctrl.c
-	eng_table.c eng_pkey.c eng_fat.c eng_all.c tb_rsa.c tb_dsa.c tb_ecdsa.c
-	tb_dh.c tb_ecdh.c tb_rand.c tb_store.c tb_cipher.c tb_digest.c tb_pkmeth.c
-	tb_asnmth.c eng_openssl.c eng_cnf.c eng_dyn.c hw_cryptodev.c eng_rsax.c
-	eng_rdrand.c eng_int.h"
+# Engine interface is disabled
+#copy_crypt engine "eng_err.c eng_lib.c eng_list.c eng_init.c eng_ctrl.c
+#	eng_table.c eng_pkey.c eng_fat.c eng_all.c tb_rsa.c tb_dsa.c tb_ecdsa.c
+#	tb_dh.c tb_ecdh.c tb_rand.c tb_store.c tb_cipher.c tb_digest.c tb_pkmeth.c
+#	tb_asnmth.c eng_openssl.c eng_cnf.c eng_dyn.c hw_cryptodev.c eng_rsax.c
+#	eng_rdrand.c eng_int.h"
 
 copy_crypt err "err.c err_all.c err_prn.c"
 
