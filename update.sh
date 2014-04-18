@@ -62,7 +62,7 @@ cp ./openbsd-src/lib/libssl/src/crypto/ec/ec_lcl.h crypto/ec/
 for i in ssl/srtp.h \
 	ssl/kssl_lcl.h \
 	ssl/ssl_locl.h; do
-	cp openbsd-src/lib/libssl/src/$i src
+	cp openbsd-src/lib/libssl/src/$i ssl
 done
 
 pushd include
@@ -86,13 +86,40 @@ for i in s3_meth.c s3_srvr.c s3_clnt.c s3_lib.c s3_enc.c s3_pkt.c s3_both.c \
 		ssl_lib.c ssl_err2.c ssl_cert.c ssl_sess.c \
 		ssl_ciph.c ssl_stat.c ssl_rsa.c \
 		ssl_asn1.c ssl_txt.c ssl_algs.c \
-		bio_ssl.c ssl_err.c kssl.c tls_srp.c t1_reneg.c	s3_cbc.c; do
-	cp openbsd-src/lib/libssl/src/ssl/$i src/
+		bio_ssl.c ssl_err.c kssl.c tls_srp.c t1_reneg.c	s3_cbc.c;
+do
+	cp openbsd-src/lib/libssl/src/ssl/$i ssl/
 done
 
-pushd src
+pushd ssl
 	cp Makefile.am.tpl Makefile.am
 	for i in *.c; do
-		echo "libopenssl_la_SOURCES += $i" >> Makefile.am
+		echo "libssl_la_SOURCES += $i" >> Makefile.am
+	done
+popd
+
+for i in crypto/cryptlib.h \
+	crypto/cryptlib.c \
+	crypto/malloc-wrapper.c \
+	crypto/mem_dbg.c \
+	crypto/cversion.c \
+	crypto/ex_data.c \
+	crypto/cpt_err.c \
+	crypto/uid.c \
+	crypto/o_time.c \
+	crypto/o_time.h \
+	crypto/o_str.c \
+	crypto/o_str.h \
+	crypto/o_fips.c \
+	e_os.h \
+	crypto/o_init.c;
+do
+	cp openbsd-src/lib/libssl/src/$i crypto
+done
+
+pushd crypto
+	cp Makefile.am.tpl Makefile.am
+	for i in *.c; do
+		echo "libcrypto_la_SOURCES += $i" >> Makefile.am
 	done
 popd

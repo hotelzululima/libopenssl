@@ -16,4 +16,4 @@ esac
 
 LT_INIT
 
-AC_OUTPUT(Makefile include/Makefile include/openssl/Makefile src/Makefile)
+AC_OUTPUT(Makefile include/Makefile include/openssl/Makefile ssl/Makefile crypto/Makefile)
