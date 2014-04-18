@@ -58,7 +58,6 @@
 
 #include <stdio.h>
 #include <errno.h>
-#define USE_SOCKETS
 #include "cryptlib.h"
 
 #if defined(OPENSSL_NO_POSIX_IO)
@@ -90,14 +89,14 @@ static BIO_METHOD methods_fdp = {
 	NULL,
 };
 
-BIO_METHOD
-*BIO_s_fd(void)
+BIO_METHOD *
+BIO_s_fd(void)
 {
 	return (&methods_fdp);
 }
 
-BIO
-*BIO_new_fd(int fd, int close_flag)
+BIO *
+BIO_new_fd(int fd, int close_flag)
 {
 	BIO *ret;
 	ret = BIO_new(BIO_s_fd());

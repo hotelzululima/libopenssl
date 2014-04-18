@@ -117,10 +117,6 @@
 #include "cryptlib.h"
 #include <openssl/safestack.h>
 
-#if defined(OPENSSL_SYS_WIN32) || defined(OPENSSL_SYS_WIN16)
-static double SSLeay_MSVC5_hack = 0.0; /* and for VC1.5 */
-#endif
-
 DECLARE_STACK_OF(CRYPTO_dynlock)
 
 /* real #defines in crypto.h, keep these upto date */
@@ -211,7 +207,7 @@ CRYPTO_get_new_lockid(char *name)
 	}
 	i = sk_OPENSSL_STRING_push(app_locks, str);
 	if (!i)
-		OPENSSL_free(str);
+		free(str);
 	else
 		i += CRYPTO_NUM_LOCKS; /* gap of one :-) */
 	return (i);
@@ -242,7 +238,7 @@ CRYPTO_get_new_dynlockid(void)
 	}
 	CRYPTO_w_unlock(CRYPTO_LOCK_DYNLOCK);
 
-	pointer = (CRYPTO_dynlock *)OPENSSL_malloc(sizeof(CRYPTO_dynlock));
+	pointer = (CRYPTO_dynlock *)malloc(sizeof(CRYPTO_dynlock));
 	if (pointer == NULL) {
 		CRYPTOerr(CRYPTO_F_CRYPTO_GET_NEW_DYNLOCKID, ERR_R_MALLOC_FAILURE);
 		return (0);
@@ -250,7 +246,7 @@ CRYPTO_get_new_dynlockid(void)
 	pointer->references = 1;
 	pointer->data = dynlock_create_callback(__FILE__, __LINE__);
 	if (pointer->data == NULL) {
-		OPENSSL_free(pointer);
+		free(pointer);
 		CRYPTOerr(CRYPTO_F_CRYPTO_GET_NEW_DYNLOCKID, ERR_R_MALLOC_FAILURE);
 		return (0);
 	}
@@ -273,7 +269,7 @@ CRYPTO_get_new_dynlockid(void)
 
 	if (i == -1) {
 		dynlock_destroy_callback(pointer->data, __FILE__, __LINE__);
-		OPENSSL_free(pointer);
+		free(pointer);
 	} else
 		i += 1; /* to avoid 0 */
 	return - i;
@@ -297,12 +293,6 @@ CRYPTO_destroy_dynlockid(int i)
 	pointer = sk_CRYPTO_dynlock_value(dyn_locks, i);
 	if (pointer != NULL) {
 		--pointer->references;
-#ifdef REF_CHECK
-		if (pointer->references < 0) {
-			fprintf(stderr, "CRYPTO_destroy_dynlockid, bad reference count\n");
-			abort();
-		} else
-#endif
 		if (pointer->references <= 0) {
 			(void)sk_CRYPTO_dynlock_set(dyn_locks, i, NULL);
 		} else
@@ -312,12 +302,12 @@ CRYPTO_destroy_dynlockid(int i)
 
 	if (pointer) {
 		dynlock_destroy_callback(pointer->data, __FILE__, __LINE__);
-		OPENSSL_free(pointer);
+		free(pointer);
 	}
 }
 
-struct CRYPTO_dynlock_value
-*CRYPTO_get_dynlock_value(int i)
+struct CRYPTO_dynlock_value *
+CRYPTO_get_dynlock_value(int i)
 {
 	CRYPTO_dynlock *pointer = NULL;
 	if (i)
@@ -337,7 +327,8 @@ struct CRYPTO_dynlock_value
 	return NULL;
 }
 
-struct CRYPTO_dynlock_value *(*CRYPTO_get_dynlock_create_callback(void))(
+struct CRYPTO_dynlock_value *
+(*CRYPTO_get_dynlock_create_callback(void))(
     const char *file, int line)
 {
 	return (dynlock_create_callback);
@@ -445,7 +436,7 @@ CRYPTO_THREADID_set_pointer(CRYPTO_THREADID *id, void *ptr)
 		const unsigned char *src = (void *)&id->ptr;
 		unsigned char snum = sizeof(id->ptr);
 		while (snum--)
-		accum += *(src++) * hash_coeffs[(snum + dnum) & 7];
+			accum += *(src++) * hash_coeffs[(snum + dnum) & 7];
 		accum += dnum;
 		*(dest++) = accum & 255;
 	}
@@ -613,8 +604,8 @@ CRYPTO_add_lock(int *pointer, int amount, int type, const char *file,
 	return (ret);
 }
 
-const char
-*CRYPTO_get_lock_name(int type)
+const char *
+CRYPTO_get_lock_name(int type)
 {
 	if (type < 0)
 		return("dynamic");
@@ -631,8 +622,8 @@ const char
 	defined(__x86_64) || defined(__x86_64__) || defined(_M_AMD64) || defined(_M_X64)
 
 unsigned int  OPENSSL_ia32cap_P[2];
-unsigned long
-*OPENSSL_ia32cap_loc(void)
+unsigned long *
+OPENSSL_ia32cap_loc(void)
 {
 	if (sizeof(long) == 4)
 		/*
@@ -646,11 +637,7 @@ unsigned long
 
 #if defined(OPENSSL_CPUID_OBJ) && !defined(OPENSSL_NO_ASM) && !defined(I386_ONLY)
 #define OPENSSL_CPUID_SETUP
-#if defined(_WIN32)
-typedef unsigned __int64 IA32CAP;
-#else
 typedef unsigned long long IA32CAP;
-#endif
 void
 OPENSSL_cpuid_setup(void)
 {
@@ -665,11 +652,8 @@ OPENSSL_cpuid_setup(void)
 	trigger = 1;
 	if ((env = getenv("OPENSSL_ia32cap"))) {
 		int off = (env[0]=='~') ? 1 : 0;
-#if defined(_WIN32)
-		if (!sscanf(env+off, "%I64i", &vec)) vec = strtoul(env+off, NULL, 0);
-#else
-		if (!sscanf(env+off, "%lli",(long long *)&vec)) vec = strtoul(env+off, NULL, 0);
-#endif
+		if (!sscanf(env+off, "%lli",(long long *)&vec))
+			vec = strtoul(env+off, NULL, 0);
 		if (off)
 			vec = OPENSSL_ia32_cpuid()&~vec;
 	} else
@@ -690,13 +674,17 @@ OPENSSL_cpuid_setup(void)
 }
 #endif
 int OPENSSL_NONPIC_relocated = 0;
+
 #if !defined(OPENSSL_CPUID_SETUP) && !defined(OPENSSL_CPUID_OBJ)
 void
-OPENSSL_cpuid_setup(void) {}
+OPENSSL_cpuid_setup(void)
+{
+}
 #endif
 
 
-void OPENSSL_showfatal(const char *fmta, ...)
+void
+OPENSSL_showfatal(const char *fmta, ...)
 {
 	va_list ap;
 
@@ -705,7 +693,8 @@ void OPENSSL_showfatal(const char *fmta, ...)
 	va_end (ap);
 }
 
-int OPENSSL_isservice(void)
+int
+OPENSSL_isservice(void)
 {
 	return 0;
 }
@@ -719,7 +708,8 @@ OpenSSLDie(const char *file, int line, const char *assertion)
 	abort();
 }
 
-void *OPENSSL_stderr(void)
+void *
+OPENSSL_stderr(void)
 {
 	return stderr;
 }

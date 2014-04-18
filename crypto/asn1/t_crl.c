@@ -66,20 +66,19 @@
 
 #ifndef OPENSSL_NO_FP_API
 int X509_CRL_print_fp(FILE *fp, X509_CRL *x)
-        {
+{
         BIO *b;
         int ret;
 
-        if ((b=BIO_new(BIO_s_file())) == NULL)
-		{
+        if ((b=BIO_new(BIO_s_file())) == NULL) {
 		X509err(X509_F_X509_CRL_PRINT_FP,ERR_R_BUF_LIB);
                 return(0);
-		}
+	}
         BIO_set_fp(b,fp,BIO_NOCLOSE);
         ret=X509_CRL_print(b, x);
         BIO_free(b);
         return(ret);
-        }
+}
 #endif
 
 int X509_CRL_print(BIO *out, X509_CRL *x)
@@ -97,7 +96,7 @@ int X509_CRL_print(BIO *out, X509_CRL *x)
 	X509_signature_print(out, x->sig_alg, NULL);
 	p=X509_NAME_oneline(X509_CRL_get_issuer(x),NULL,0);
 	BIO_printf(out,"%8sIssuer: %s\n","",p);
-	OPENSSL_free(p);
+	free(p);
 	BIO_printf(out,"%8sLast Update: ","");
 	ASN1_TIME_print(out,X509_CRL_get_lastUpdate(x));
 	BIO_printf(out,"\n%8sNext Update: ","");

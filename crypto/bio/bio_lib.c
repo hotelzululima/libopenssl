@@ -63,18 +63,18 @@
 #include <openssl/bio.h>
 #include <openssl/stack.h>
 
-BIO
-*BIO_new(BIO_METHOD *method)
+BIO *
+BIO_new(BIO_METHOD *method)
 {
 	BIO *ret = NULL;
 
-	ret = (BIO *)OPENSSL_malloc(sizeof(BIO));
+	ret = (BIO *)malloc(sizeof(BIO));
 	if (ret == NULL) {
 		BIOerr(BIO_F_BIO_NEW, ERR_R_MALLOC_FAILURE);
 		return (NULL);
 	}
 	if (!BIO_set(ret, method)) {
-		OPENSSL_free(ret);
+		free(ret);
 		ret = NULL;
 	}
 	return (ret);
@@ -116,17 +116,8 @@ BIO_free(BIO *a)
 		return (0);
 
 	i = CRYPTO_add(&a->references, -1, CRYPTO_LOCK_BIO);
-#ifdef REF_PRINT
-	REF_PRINT("BIO", a);
-#endif
 	if (i > 0)
 		return (1);
-#ifdef REF_CHECK
-	if (i < 0) {
-		fprintf(stderr, "BIO_free, bad reference count\n");
-		abort();
-	}
-#endif
 	if ((a->callback != NULL) &&
 	    ((i = (int)a->callback(a, BIO_CB_FREE, NULL, 0, 0L, 1L)) <= 0))
 		return (i);
@@ -136,7 +127,7 @@ BIO_free(BIO *a)
 	if ((a->method == NULL) || (a->method->destroy == NULL))
 		return (1);
 	a->method->destroy(a);
-	OPENSSL_free(a);
+	free(a);
 	return (1);
 }
 
@@ -352,8 +343,8 @@ BIO_int_ctrl(BIO *b, int cmd, long larg, int iarg)
 	return (BIO_ctrl(b, cmd, larg, (char *)&i));
 }
 
-char
-*BIO_ptr_ctrl(BIO *b, int cmd, long larg)
+char *
+BIO_ptr_ctrl(BIO *b, int cmd, long larg)
 {
 	char *p = NULL;
 
@@ -435,8 +426,8 @@ BIO_ctrl_wpending(BIO *bio)
 
 
 /* put the 'bio' on the end of b's list of operators */
-BIO
-*BIO_push(BIO *b, BIO *bio)
+BIO *
+BIO_push(BIO *b, BIO *bio)
 {
 	BIO *lb;
 
@@ -454,8 +445,8 @@ BIO
 }
 
 /* Remove the first and return the rest */
-BIO
-*BIO_pop(BIO *b)
+BIO *
+BIO_pop(BIO *b)
 {
 	BIO *ret;
 
@@ -475,8 +466,8 @@ BIO
 	return (ret);
 }
 
-BIO
-*BIO_get_retry_BIO(BIO *bio, int *reason)
+BIO *
+BIO_get_retry_BIO(BIO *bio, int *reason)
 {
 	BIO *b, *last;
 
@@ -500,8 +491,8 @@ BIO_get_retry_reason(BIO *bio)
 	return (bio->retry_reason);
 }
 
-BIO
-*BIO_find_type(BIO *bio, int type)
+BIO *
+BIO_find_type(BIO *bio, int type)
 {
 	int mt, mask;
 
@@ -522,8 +513,8 @@ BIO
 	return (NULL);
 }
 
-BIO
-*BIO_next(BIO *b)
+BIO *
+BIO_next(BIO *b)
 {
 	if (!b)
 		return NULL;
@@ -547,8 +538,8 @@ BIO_free_all(BIO *bio)
 	}
 }
 
-BIO
-*BIO_dup_chain(BIO *in)
+BIO *
+BIO_dup_chain(BIO *in)
 {
 	BIO *ret = NULL, *eoc = NULL, *bio, *new_bio;
 
@@ -611,8 +602,8 @@ BIO_set_ex_data(BIO *bio, int idx, void *data)
 	return (CRYPTO_set_ex_data(&(bio->ex_data), idx, data));
 }
 
-void
-*BIO_get_ex_data(BIO *bio, int idx)
+void *
+BIO_get_ex_data(BIO *bio, int idx)
 {
 	return (CRYPTO_get_ex_data(&(bio->ex_data), idx));
 }

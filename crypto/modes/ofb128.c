@@ -1,9 +1,5 @@
-/* crypto/o_str.h -*- mode:C; c-file-style: "eay" -*- */
-/* Written by Richard Levitte (richard@levitte.org) for the OpenSSL
- * project 2003.
- */
 /* ====================================================================
- * Copyright (c) 2003 The OpenSSL Project.  All rights reserved.
+ * Copyright (c) 2008 The OpenSSL Project.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -20,12 +16,12 @@
  * 3. All advertising materials mentioning features or use of this
  *    software must display the following acknowledgment:
  *    "This product includes software developed by the OpenSSL Project
- *    for use in the OpenSSL Toolkit. (http://www.OpenSSL.org/)"
+ *    for use in the OpenSSL Toolkit. (http://www.openssl.org/)"
  *
  * 4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
  *    endorse or promote products derived from this software without
  *    prior written permission. For written permission, please contact
- *    licensing@OpenSSL.org.
+ *    openssl-core@openssl.org.
  *
  * 5. Products derived from this software may not be called "OpenSSL"
  *    nor may "OpenSSL" appear in their names without prior written
@@ -34,7 +30,7 @@
  * 6. Redistributions of any form whatsoever must retain the following
  *    acknowledgment:
  *    "This product includes software developed by the OpenSSL Project
- *    for use in the OpenSSL Toolkit (http://www.OpenSSL.org/)"
+ *    for use in the OpenSSL Toolkit (http://www.openssl.org/)"
  *
  * THIS SOFTWARE IS PROVIDED BY THE OpenSSL PROJECT ``AS IS'' AND ANY
  * EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -50,19 +46,76 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  * ====================================================================
  *
- * This product includes cryptographic software written by Eric Young
- * (eay@cryptsoft.com).  This product includes software written by Tim
- * Hudson (tjh@cryptsoft.com).
- *
  */
 
-#ifndef HEADER_O_STR_H
-#define HEADER_O_STR_H
+#include <openssl/crypto.h>
+#include "modes_lcl.h"
+#include <string.h>
 
-#include <stddef.h>		/* to get size_t */
-
-int OPENSSL_strcasecmp(const char *str1, const char *str2);
-int OPENSSL_strncasecmp(const char *str1, const char *str2, size_t n);
-int OPENSSL_memcmp(const void *p1, const void *p2, size_t n);
-
+#ifndef MODES_DEBUG
+# ifndef NDEBUG
+#  define NDEBUG
+# endif
 #endif
+#include <assert.h>
+
+/* The input and output encrypted as though 128bit ofb mode is being
+ * used.  The extra state information to record how much of the
+ * 128bit block we have used is contained in *num;
+ */
+void CRYPTO_ofb128_encrypt(const unsigned char *in, unsigned char *out,
+			size_t len, const void *key,
+			unsigned char ivec[16], int *num,
+			block128_f block)
+{
+	unsigned int n;
+	size_t l=0;
+
+	assert(in && out && key && ivec && num);
+
+	n = *num;
+
+#if !defined(OPENSSL_SMALL_FOOTPRINT)
+	if (16%sizeof(size_t) == 0) do { /* always true actually */
+		while (n && len) {
+			*(out++) = *(in++) ^ ivec[n];
+			--len;
+			n = (n+1) % 16;
+		}
+#if defined(STRICT_ALIGNMENT)
+		if (((size_t)in|(size_t)out|(size_t)ivec)%sizeof(size_t) != 0)
+			break;
+#endif
+		while (len>=16) {
+			(*block)(ivec, ivec, key);
+			for (; n<16; n+=sizeof(size_t))
+				*(size_t*)(out+n) =
+				*(size_t*)(in+n) ^ *(size_t*)(ivec+n);
+			len -= 16;
+			out += 16;
+			in  += 16;
+			n = 0;
+		}
+		if (len) {
+			(*block)(ivec, ivec, key);
+			while (len--) {
+				out[n] = in[n] ^ ivec[n];
+				++n;
+			}
+		}
+		*num = n;
+		return;
+	} while(0);
+	/* the rest would be commonly eliminated by x86* compiler */
+#endif
+	while (l<len) {
+		if (n==0) {
+			(*block)(ivec, ivec, key);
+		}
+		out[l] = in[l] ^ ivec[n];
+		++l;
+		n = (n+1) % 16;
+	}
+
+	*num=n;
+}

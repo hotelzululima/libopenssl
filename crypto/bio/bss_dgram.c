@@ -60,10 +60,12 @@
 
 #include <stdio.h>
 #include <errno.h>
-#define USE_SOCKETS
 #include "cryptlib.h"
-
 #include <openssl/bio.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
 #ifndef OPENSSL_NO_DGRAM
 
 #ifndef OPENSSL_NO_SCTP
@@ -187,14 +189,14 @@ typedef struct bio_dgram_sctp_data_st {
 } bio_dgram_sctp_data;
 #endif
 
-BIO_METHOD
-*BIO_s_datagram(void)
+BIO_METHOD *
+BIO_s_datagram(void)
 {
 	return (&methods_dgramp);
 }
 
-BIO
-*BIO_new_dgram(int fd, int close_flag)
+BIO *
+BIO_new_dgram(int fd, int close_flag)
 {
 	BIO *ret;
 
@@ -212,7 +214,7 @@ dgram_new(BIO *bi)
 
 	bi->init = 0;
 	bi->num = 0;
-	data = OPENSSL_malloc(sizeof(bio_dgram_data));
+	data = malloc(sizeof(bio_dgram_data));
 	if (data == NULL)
 		return 0;
 	memset(data, 0x00, sizeof(bio_dgram_data));
@@ -234,7 +236,7 @@ dgram_free(BIO *a)
 
 	data = (bio_dgram_data *)a->ptr;
 	if (data != NULL)
-		OPENSSL_free(data);
+		free(data);
 
 	return (1);
 }
@@ -396,11 +398,7 @@ dgram_write(BIO *b, const char *in, int inl)
 		else if (data->peer.sa.sa_family == AF_INET6)
 			peerlen = sizeof(data->peer.sa_in6);
 #endif
-#if defined(NETWARE_CLIB) && defined(NETWARE_BSDSOCK)
-		ret = sendto(b->num, (char *)in, inl, 0, &data->peer.sa, peerlen);
-#else
 		ret = sendto(b->num, in, inl, 0, &data->peer.sa, peerlen);
-#endif
 	}
 
 	BIO_clear_retry_flags(b);
@@ -409,12 +407,10 @@ dgram_write(BIO *b, const char *in, int inl)
 			BIO_set_retry_write(b);
 
 			data->_errno = errno;
-
-#if 0 /* higher layers are responsible for querying MTU, if necessary */
-			if (data->_errno == EMSGSIZE)
-				/* retrieve the new MTU */
-			BIO_ctrl(b, BIO_CTRL_DGRAM_QUERY_MTU, 0, NULL);
-#endif
+			/*
+			 * higher layers are responsible for querying MTU,
+			 * if necessary
+			 */
 		}
 	}
 	return (ret);
@@ -484,28 +480,19 @@ dgram_ctrl(BIO *b, int cmd, long num, void *ptr)
 		break;
 	case BIO_CTRL_DGRAM_CONNECT:
 		to = (struct sockaddr *)ptr;
-#if 0
-		if (connect(b->num, to, sizeof(struct sockaddr)) < 0) {
-			perror("connect");
-			ret = 0;
-		} else {
-#endif
-			switch (to->sa_family) {
-			case AF_INET:
-				memcpy(&data->peer, to, sizeof(data->peer.sa_in));
-				break;
+		switch (to->sa_family) {
+		case AF_INET:
+			memcpy(&data->peer, to, sizeof(data->peer.sa_in));
+			break;
 #if OPENSSL_USE_IPV6
-			case AF_INET6:
-				memcpy(&data->peer, to, sizeof(data->peer.sa_in6));
-				break;
+		case AF_INET6:
+			memcpy(&data->peer, to, sizeof(data->peer.sa_in6));
+			break;
 #endif
-			default:
-				memcpy(&data->peer, to, sizeof(data->peer.sa));
-				break;
-			}
-#if 0
+		default:
+			memcpy(&data->peer, to, sizeof(data->peer.sa));
+			break;
 		}
-#endif
 		break;
 		/* (Linux)kernel sets DF bit on outgoing IP packets */
 	case BIO_CTRL_DGRAM_MTU_DISCOVER:
@@ -764,14 +751,14 @@ dgram_puts(BIO *bp, const char *str)
 }
 
 #ifndef OPENSSL_NO_SCTP
-BIO_METHOD
-*BIO_s_datagram_sctp(void)
+BIO_METHOD *
+BIO_s_datagram_sctp(void)
 {
 	return (&methods_dgramp_sctp);
 }
 
-BIO
-*BIO_new_dgram_sctp(int fd, int close_flag)
+BIO *
+BIO_new_dgram_sctp(int fd, int close_flag)
 {
 	BIO *bio;
 	int ret, optval = 20000;
@@ -805,7 +792,7 @@ BIO
 	 * SCTP-AUTH has to be activated for the listening socket
 	 * already, otherwise the connected socket won't use it. */
 	sockopt_len = (socklen_t)(sizeof(sctp_assoc_t) + 256 * sizeof(uint8_t));
-	authchunks = OPENSSL_malloc(sockopt_len);
+	authchunks = malloc(sockopt_len);
 	memset(authchunks, 0, sizeof(sockopt_len));
 	ret = getsockopt(fd, IPPROTO_SCTP, SCTP_LOCAL_AUTH_CHUNKS, authchunks, &sockopt_len);
 	OPENSSL_assert(ret >= 0);
@@ -819,7 +806,7 @@ BIO
 			auth_forward = 1;
 	}
 
-	OPENSSL_free(authchunks);
+	free(authchunks);
 
 	OPENSSL_assert(auth_data);
 	OPENSSL_assert(auth_forward);
@@ -866,7 +853,7 @@ dgram_sctp_new(BIO *bi)
 
 	bi->init = 0;
 	bi->num = 0;
-	data = OPENSSL_malloc(sizeof(bio_dgram_sctp_data));
+	data = malloc(sizeof(bio_dgram_sctp_data));
 	if (data == NULL)
 		return 0;
 	memset(data, 0x00, sizeof(bio_dgram_sctp_data));
@@ -891,7 +878,7 @@ dgram_sctp_free(BIO *a)
 
 	data = (bio_dgram_sctp_data *)a->ptr;
 	if (data != NULL)
-		OPENSSL_free(data);
+		free(data);
 
 	return (1);
 }
@@ -998,7 +985,7 @@ dgram_sctp_read(BIO *b, char *out, int outl)
 					if (data->saved_message.length > 0) {
 						dgram_sctp_write(data->saved_message.bio, data->saved_message.data,
 						data->saved_message.length);
-						OPENSSL_free(data->saved_message.data);
+						free(data->saved_message.data);
 						data->saved_message.length = 0;
 					}
 
@@ -1087,7 +1074,7 @@ dgram_sctp_read(BIO *b, char *out, int outl)
 			struct sctp_authchunks *authchunks;
 
 			optlen = (socklen_t)(sizeof(sctp_assoc_t) + 256 * sizeof(uint8_t));
-			authchunks = OPENSSL_malloc(optlen);
+			authchunks = malloc(optlen);
 			memset(authchunks, 0, sizeof(optlen));
 			ii = getsockopt(b->num, IPPROTO_SCTP, SCTP_PEER_AUTH_CHUNKS, authchunks, &optlen);
 			OPENSSL_assert(ii >= 0);
@@ -1101,7 +1088,7 @@ dgram_sctp_read(BIO *b, char *out, int outl)
 					auth_forward = 1;
 			}
 
-			OPENSSL_free(authchunks);
+			free(authchunks);
 
 			if (!auth_data || !auth_forward) {
 				BIOerr(BIO_F_DGRAM_SCTP_READ, BIO_R_CONNECT_ERROR);
@@ -1154,7 +1141,7 @@ dgram_sctp_write(BIO *b, const char *in, int inl)
 	if (data->save_shutdown && !BIO_dgram_sctp_wait_for_dry(b)) {
 		data->saved_message.bio = b;
 		data->saved_message.length = inl;
-		data->saved_message.data = OPENSSL_malloc(inl);
+		data->saved_message.data = malloc(inl);
 		memcpy(data->saved_message.data, in, inl);
 		return inl;
 	}
@@ -1282,7 +1269,7 @@ dgram_sctp_ctrl(BIO *b, int cmd, long num, void *ptr)
 
 		/* Add new key */
 		sockopt_len = sizeof(struct sctp_authkey) + 64 * sizeof(uint8_t);
-		authkey = OPENSSL_malloc(sockopt_len);
+		authkey = malloc(sockopt_len);
 		memset(authkey, 0x00, sockopt_len);
 		authkey->sca_keynumber = authkeyid.scact_keynumber + 1;
 #ifndef __FreeBSD__

@@ -59,16 +59,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#define USE_SOCKETS
 #include "cryptlib.h"
 #include <openssl/bio.h>
-#if defined(OPENSSL_SYS_NETWARE) && defined(NETWARE_BSDSOCK)
-#include <netdb.h>
-#if defined(NETWARE_CLIB)
 #include <sys/ioctl.h>
-NETDB_DEFINE_CONTEXT
-#endif
-#endif
+
+#include <netdb.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
 #ifndef OPENSSL_NO_SOCK
 
@@ -84,38 +81,7 @@ NETDB_DEFINE_CONTEXT
 #define MAX_LISTEN  32
 #endif
 
-#if defined(OPENSSL_SYS_WINDOWS) || (defined(OPENSSL_SYS_NETWARE) && !defined(NETWARE_BSDSOCK))
-static int wsa_init_done = 0;
-#endif
-
-/*
- * WSAAPI specifier is required to make indirect calls to run-time
- * linked WinSock 2 functions used in this module, to be specific
- * [get|free]addrinfo and getnameinfo. This is because WinSock uses
- * uses non-C calling convention, __stdcall vs. __cdecl, on x86
- * Windows. On non-WinSock platforms WSAAPI needs to be void.
- */
-#ifndef WSAAPI
-#define WSAAPI
-#endif
-
-#if 0
-static unsigned long BIO_ghbn_hits = 0L;
-static unsigned long BIO_ghbn_miss = 0L;
-
-#define GHBN_NUM	4
-static struct ghbn_cache_st {
-	char name[129];
-	struct hostent *ent;
-	unsigned long order;
-} ghbn_cache[GHBN_NUM];
-#endif
-
 static int get_ip(const char *str, unsigned char *ip);
-#if 0
-static void ghbn_free(struct hostent *a);
-static struct hostent *ghbn_dup(struct hostent *a);
-#endif
 
 int
 BIO_get_host_ip(const char *str, unsigned char *ip)
@@ -203,13 +169,9 @@ BIO_get_port(const char *str, unsigned short *port_ptr)
 				*port_ptr = 21;
 			else if (strcmp(str, "gopher") == 0)
 				*port_ptr = 70;
-#if 0
-			else if (strcmp(str, "wais") == 0)
-				*port_ptr = 21;
-#endif
 			else {
 				SYSerr(SYS_F_GETSERVBYNAME, errno);
-				ERR_add_error_data(3, "service = '", str, "'");
+				ERR_add_error_data(3, "service='", str, "'");
 				return (0);
 			}
 		}
@@ -222,10 +184,6 @@ BIO_sock_error(int sock)
 {
 	int j, i;
 	int size;
-
-#if defined(OPENSSL_SYS_BEOS_R5)
-	return 0;
-#endif
 
 	size = sizeof(int);
 	/* Note: under Windows the third parameter is of type (char *)
@@ -263,13 +221,9 @@ BIO_socket_ioctl(int fd, long type, void *arg)
 {
 	int i;
 
-#ifdef __DJGPP__
-	i = ioctl(fd, type, (char *)arg);
-#else
 #  define ARG arg
 
 	i = ioctl(fd, type, ARG);
-#endif /* __DJGPP__ */
 	if (i < 0)
 		SYSerr(SYS_F_IOCTLSOCKET, errno);
 	return (i);
@@ -355,13 +309,13 @@ BIO_get_accept_socket(char *host, int bind_mode)
 	do {
 		static union {
 			void *p;
-			int (WSAAPI *f)(const char *, const char *,
+			int (*f)(const char *, const char *,
 			    const struct addrinfo *,
 			    struct addrinfo **);
 		} p_getaddrinfo = {NULL};
 		static union {
 			void *p;
-			void (WSAAPI *f)(struct addrinfo *);
+			void (*f)(struct addrinfo *);
 		} p_freeaddrinfo = {NULL};
 		struct addrinfo *res, hint;
 
@@ -430,7 +384,7 @@ again:
 	s = socket(server.sa.sa_family, SOCK_STREAM, SOCKET_PROTOCOL);
 	if (s == -1) {
 		SYSerr(SYS_F_SOCKET, errno);
-		ERR_add_error_data(3, "port = '", host, "'");
+		ERR_add_error_data(3, "port='", host, "'");
 		BIOerr(BIO_F_BIO_GET_ACCEPT_SOCKET, BIO_R_UNABLE_TO_CREATE_SOCKET);
 		goto err;
 	}
@@ -477,20 +431,20 @@ again:
 		}
 #endif
 		SYSerr(SYS_F_BIND, err_num);
-		ERR_add_error_data(3, "port = '", host, "'");
+		ERR_add_error_data(3, "port='", host, "'");
 		BIOerr(BIO_F_BIO_GET_ACCEPT_SOCKET, BIO_R_UNABLE_TO_BIND_SOCKET);
 		goto err;
 	}
 	if (listen(s, MAX_LISTEN) == -1) {
 		SYSerr(SYS_F_BIND, errno);
-		ERR_add_error_data(3, "port = '", host, "'");
+		ERR_add_error_data(3, "port='", host, "'");
 		BIOerr(BIO_F_BIO_GET_ACCEPT_SOCKET, BIO_R_UNABLE_TO_LISTEN_SOCKET);
 		goto err;
 	}
 	ret = 1;
 err:
 	if (str != NULL)
-		OPENSSL_free(str);
+		free(str);
 	if ((ret == 0) && (s != -1)) {
 		close(s);
 		s = -1;
@@ -567,7 +521,7 @@ BIO_accept(int sock, char **addr)
 		size_t nl;
 		static union {
 			void *p;
-			int (WSAAPI *f)(const struct sockaddr *,
+			int (*f)(const struct sockaddr *,
 			size_t/*socklen_t*/, char *, size_t,
 			    char *, size_t, int);
 		} p_getnameinfo = {NULL};
@@ -591,9 +545,9 @@ BIO_accept(int sock, char **addr)
 		p = *addr;
 		if (p) {
 			*p = '\0';
-			p = OPENSSL_realloc(p, nl);
+			p = realloc(p, nl);
 		} else {
-			p = OPENSSL_malloc(nl);
+			p = malloc(nl);
 		}
 		if (p == NULL) {
 			BIOerr(BIO_F_BIO_ACCEPT, ERR_R_MALLOC_FAILURE);
@@ -609,7 +563,7 @@ BIO_accept(int sock, char **addr)
 	l = ntohl(sa.from.sa_in.sin_addr.s_addr);
 	port = ntohs(sa.from.sa_in.sin_port);
 	if (*addr == NULL) {
-		if ((p = OPENSSL_malloc(24)) == NULL) {
+		if ((p = malloc(24)) == NULL) {
 			BIOerr(BIO_F_BIO_ACCEPT, ERR_R_MALLOC_FAILURE);
 			goto end;
 		}

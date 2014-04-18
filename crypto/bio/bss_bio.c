@@ -85,14 +85,6 @@
 
 #include "e_os.h"
 
-/* VxWorks defines SSIZE_MAX with an empty value causing compile errors */
-#if defined(OPENSSL_SYS_VXWORKS)
-# undef SSIZE_MAX
-#endif
-#ifndef SSIZE_MAX
-# define SSIZE_MAX INT_MAX
-#endif
-
 static int bio_new(BIO *bio);
 static int bio_free(BIO *bio);
 static int bio_read(BIO *bio, char *buf, int size);
@@ -116,8 +108,8 @@ static BIO_METHOD methods_biop = {
 	NULL /* no bio_callback_ctrl */
 };
 
-BIO_METHOD
-*BIO_s_bio(void)
+BIO_METHOD *
+BIO_s_bio(void)
 {
 	return &methods_biop;
 }
@@ -146,7 +138,7 @@ bio_new(BIO *bio)
 {
 	struct bio_bio_st *b;
 
-	b = OPENSSL_malloc(sizeof *b);
+	b = malloc(sizeof *b);
 	if (b == NULL)
 		return 0;
 
@@ -173,10 +165,10 @@ bio_free(BIO *bio)
 		bio_destroy_pair(bio);
 
 	if (b->buf != NULL) {
-		OPENSSL_free(b->buf);
+		free(b->buf);
 	}
 
-	OPENSSL_free(b);
+	free(b);
 
 	return 1;
 }
@@ -516,7 +508,7 @@ bio_ctrl(BIO *bio, int cmd, long num, void *ptr)
 
 			if (b->size != new_size) {
 				if (b->buf) {
-					OPENSSL_free(b->buf);
+					free(b->buf);
 					b->buf = NULL;
 				}
 				b->size = new_size;
@@ -701,7 +693,7 @@ bio_make_pair(BIO *bio1, BIO *bio2)
 	}
 
 	if (b1->buf == NULL) {
-		b1->buf = OPENSSL_malloc(b1->size);
+		b1->buf = malloc(b1->size);
 		if (b1->buf == NULL) {
 			BIOerr(BIO_F_BIO_MAKE_PAIR, ERR_R_MALLOC_FAILURE);
 			return 0;
@@ -711,7 +703,7 @@ bio_make_pair(BIO *bio1, BIO *bio2)
 	}
 
 	if (b2->buf == NULL) {
-		b2->buf = OPENSSL_malloc(b2->size);
+		b2->buf = malloc(b2->size);
 		if (b2->buf == NULL) {
 			BIOerr(BIO_F_BIO_MAKE_PAIR, ERR_R_MALLOC_FAILURE);
 			return 0;

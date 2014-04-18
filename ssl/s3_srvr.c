@@ -1129,24 +1129,6 @@ ssl3_get_client_hello(SSL *s)
 				break;
 			}
 		}
-/*
- * Disabled because it can be used in a ciphersuite downgrade
- * attack: CVE-2010-4180.
- */
-#if 0
-		if (j == 0 && (s->options & SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG) && (sk_SSL_CIPHER_num(ciphers) == 1)) {
-			/* Special case as client bug workaround: the previously used cipher may
-			 * not be in the current list, the client instead might be trying to
-			 * continue using a cipher that before wasn't chosen due to server
-			 * preferences.  We'll have to reject the connection if the cipher is not
-			 * enabled, though. */
-			c = sk_SSL_CIPHER_value(ciphers, 0);
-			if (sk_SSL_CIPHER_find(SSL_get_ciphers(s), c) >= 0) {
-				s->session->cipher = c;
-				j = 1;
-			}
-		}
-#endif
 		if (j == 0) {
 			/* we need to have the cipher in the cipher
 			 * list if we are asked to reuse it */
@@ -1554,13 +1536,11 @@ ssl3_send_server_done(SSL *s)
 int
 ssl3_send_server_key_exchange(SSL *s)
 {
-#ifndef OPENSSL_NO_RSA
 	unsigned char *q;
 	int j, num;
 	RSA *rsa;
 	unsigned char md_buf[MD5_DIGEST_LENGTH + SHA_DIGEST_LENGTH];
 	unsigned int u;
-#endif
 #ifndef OPENSSL_NO_DH
 	DH *dh = NULL, *dhp;
 #endif
@@ -1596,7 +1576,6 @@ ssl3_send_server_key_exchange(SSL *s)
 
 		r[0] = r[1] = r[2] = r[3] = NULL;
 		n = 0;
-#ifndef OPENSSL_NO_RSA
 		if (type & SSL_kRSA) {
 			rsa = cert->rsa_tmp;
 			if ((rsa == NULL) && (s->cert->rsa_tmp_cb != NULL)) {
@@ -1623,7 +1602,6 @@ ssl3_send_server_key_exchange(SSL *s)
 			r[1] = rsa->e;
 			s->s3->tmp.use_rsa_tmp = 1;
 		} else
-#endif
 #ifndef OPENSSL_NO_DH
 		if (type & SSL_kEDH) {
 			dhp = cert->dh_tmp;
@@ -1760,7 +1738,7 @@ ssl3_send_server_key_exchange(SSL *s)
 			    NULL, 0, NULL);
 
 			encodedPoint = (unsigned char *)
-			OPENSSL_malloc(encodedlen*sizeof(unsigned char));
+			malloc(encodedlen*sizeof(unsigned char));
 
 			bn_ctx = BN_CTX_new();
 			if ((encodedPoint == NULL) || (bn_ctx == NULL)) {
@@ -1891,7 +1869,7 @@ ssl3_send_server_key_exchange(SSL *s)
 			p += 1;
 			memcpy((unsigned char*)p,
 			    (unsigned char *)encodedPoint, encodedlen);
-			OPENSSL_free(encodedPoint);
+			free(encodedPoint);
 			encodedPoint = NULL;
 			p += encodedlen;
 		}
@@ -1913,7 +1891,6 @@ ssl3_send_server_key_exchange(SSL *s)
 			 * n is the length of the params, they start at &(d[4])
 			 * and p points to the space at the end.
 			 */
-#ifndef OPENSSL_NO_RSA
 			if (pkey->type == EVP_PKEY_RSA
 				&& TLS1_get_version(s) < TLS1_2_VERSION) {
 				q = md_buf;
@@ -1946,7 +1923,6 @@ ssl3_send_server_key_exchange(SSL *s)
 				s2n(u, p);
 				n += u + 2;
 			} else
-#endif
 			if (md) {
 				/* 
 				 * For TLS1.2 and later send signature
@@ -2012,7 +1988,7 @@ f_err:
 err:
 #ifndef OPENSSL_NO_ECDH
 	if (encodedPoint != NULL)
-		OPENSSL_free(encodedPoint);
+		free(encodedPoint);
 	BN_CTX_free(bn_ctx);
 #endif
 	EVP_MD_CTX_cleanup(&md_ctx);
@@ -2120,10 +2096,8 @@ ssl3_get_client_key_exchange(SSL *s)
 	long n;
 	unsigned long alg_k;
 	unsigned char *p;
-#ifndef OPENSSL_NO_RSA
 	RSA *rsa = NULL;
 	EVP_PKEY *pkey = NULL;
-#endif
 #ifndef OPENSSL_NO_DH
 	BIGNUM *pub = NULL;
 	DH *dh_srvr;
@@ -2149,7 +2123,6 @@ ssl3_get_client_key_exchange(SSL *s)
 
 	alg_k = s->s3->tmp.new_cipher->algorithm_mkey;
 
-#ifndef OPENSSL_NO_RSA
 	if (alg_k & SSL_kRSA) {
 		/* FIX THIS UP EAY EAY EAY EAY */
 		if (s->s3->tmp.use_rsa_tmp) {
@@ -2259,7 +2232,6 @@ ssl3_get_client_key_exchange(SSL *s)
 		    p, i);
 		OPENSSL_cleanse(p, i);
 	} else
-#endif
 #ifndef OPENSSL_NO_DH
 	if (alg_k & (SSL_kEDH|SSL_kDHr|SSL_kDHd)) {
 		n2s(p, i);
@@ -2706,7 +2678,7 @@ ssl3_get_client_key_exchange(SSL *s)
 		s2n(psk_len, t);
 
 		if (s->session->psk_identity != NULL)
-			OPENSSL_free(s->session->psk_identity);
+			free(s->session->psk_identity);
 		s->session->psk_identity = BUF_strdup((char *)p);
 		if (s->session->psk_identity == NULL) {
 			SSLerr(SSL_F_SSL3_GET_CLIENT_KEY_EXCHANGE,
@@ -2715,7 +2687,7 @@ ssl3_get_client_key_exchange(SSL *s)
 		}
 
 		if (s->session->psk_identity_hint != NULL)
-			OPENSSL_free(s->session->psk_identity_hint);
+			free(s->session->psk_identity_hint);
 		s->session->psk_identity_hint = BUF_strdup(s->ctx->psk_identity_hint);
 		if (s->ctx->psk_identity_hint != NULL &&
 			s->session->psk_identity_hint == NULL) {
@@ -2752,7 +2724,7 @@ ssl3_get_client_key_exchange(SSL *s)
 			goto err;
 		}
 		if (s->session->srp_username != NULL)
-			OPENSSL_free(s->session->srp_username);
+			free(s->session->srp_username);
 		s->session->srp_username = BUF_strdup(s->srp_ctx.login);
 		if (s->session->srp_username == NULL) {
 			SSLerr(SSL_F_SSL3_GET_CLIENT_KEY_EXCHANGE,
@@ -2851,9 +2823,7 @@ ssl3_get_client_key_exchange(SSL *s)
 	return (1);
 f_err:
 	ssl3_send_alert(s, SSL3_AL_FATAL, al);
-#if !defined(OPENSSL_NO_DH) || !defined(OPENSSL_NO_RSA) || !defined(OPENSSL_NO_ECDH) || defined(OPENSSL_NO_SRP)
 err:
-#endif
 #ifndef OPENSSL_NO_ECDH
 	EVP_PKEY_free(clnt_pub_pkey);
 	EC_POINT_free(clnt_ecpoint);
@@ -3010,7 +2980,6 @@ ssl3_get_cert_verify(SSL *s)
 			goto f_err;
 		}
 	} else
-#ifndef OPENSSL_NO_RSA 
 	if (pkey->type == EVP_PKEY_RSA) {
 		i = RSA_verify(NID_md5_sha1, s->s3->tmp.cert_verify_md,
 		    MD5_DIGEST_LENGTH + SHA_DIGEST_LENGTH, p, i,
@@ -3028,8 +2997,6 @@ ssl3_get_cert_verify(SSL *s)
 			goto f_err;
 		}
 	} else
-#endif
-#ifndef OPENSSL_NO_DSA
 	if (pkey->type == EVP_PKEY_DSA) {
 		j = DSA_verify(pkey->save_type,
 		    &(s->s3->tmp.cert_verify_md[MD5_DIGEST_LENGTH]),
@@ -3042,7 +3009,6 @@ ssl3_get_cert_verify(SSL *s)
 			goto f_err;
 		}
 	} else
-#endif
 #ifndef OPENSSL_NO_ECDSA
 	if (pkey->type == EVP_PKEY_EC) {
 		j = ECDSA_verify(pkey->save_type,
@@ -3314,7 +3280,7 @@ ssl3_send_newsession_ticket(SSL *s)
  		 */
 		if (slen_full > 0xFF00)
 			return -1;
-		senc = OPENSSL_malloc(slen_full);
+		senc = malloc(slen_full);
 		if (!senc)
 			return -1;
 		p = senc;
@@ -3327,7 +3293,7 @@ ssl3_send_newsession_ticket(SSL *s)
 		const_p = senc;
 		sess = d2i_SSL_SESSION(NULL, &const_p, slen_full);
 		if (sess == NULL) {
-			OPENSSL_free(senc);
+			free(senc);
 			return -1;
 		}
 
@@ -3337,7 +3303,7 @@ ssl3_send_newsession_ticket(SSL *s)
 		slen = i2d_SSL_SESSION(sess, NULL);
 		if (slen > slen_full) {
 			/* shouldn't ever happen */
-			OPENSSL_free(senc);
+			free(senc);
 			return -1;
 		}
 		p = senc;
@@ -3372,7 +3338,7 @@ ssl3_send_newsession_ticket(SSL *s)
 		if (tctx->tlsext_ticket_key_cb) {
 			if (tctx->tlsext_ticket_key_cb(s, key_name, iv, &ctx,
 			    &hctx, 1) < 0) {
-				OPENSSL_free(senc);
+				free(senc);
 				return -1;
 			}
 		} else {
@@ -3426,7 +3392,7 @@ ssl3_send_newsession_ticket(SSL *s)
 		s->init_num = len;
 		s->state = SSL3_ST_SW_SESSION_TICKET_B;
 		s->init_off = 0;
-		OPENSSL_free(senc);
+		free(senc);
 	}
 
 	/* SSL3_ST_SW_SESSION_TICKET_B */
@@ -3529,7 +3495,7 @@ ssl3_get_next_proto(SSL *s)
 	if (proto_len + padding_len + 2 != s->init_num)
 		return 0;
 
-	s->next_proto_negotiated = OPENSSL_malloc(proto_len);
+	s->next_proto_negotiated = malloc(proto_len);
 	if (!s->next_proto_negotiated) {
 		SSLerr(SSL_F_SSL3_GET_NEXT_PROTO, ERR_R_MALLOC_FAILURE);
 		return 0;

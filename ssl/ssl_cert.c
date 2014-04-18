@@ -163,13 +163,9 @@ static void
 ssl_cert_set_default_md(CERT *cert)
 {
 	/* Set digest values to defaults */
-#ifndef OPENSSL_NO_DSA
 	cert->pkeys[SSL_PKEY_DSA_SIGN].digest = EVP_sha1();
-#endif
-#ifndef OPENSSL_NO_RSA
 	cert->pkeys[SSL_PKEY_RSA_SIGN].digest = EVP_sha1();
 	cert->pkeys[SSL_PKEY_RSA_ENC].digest = EVP_sha1();
-#endif
 #ifndef OPENSSL_NO_ECDSA
 	cert->pkeys[SSL_PKEY_ECC].digest = EVP_sha1();
 #endif
@@ -180,7 +176,7 @@ CERT
 {
 	CERT *ret;
 
-	ret = (CERT *)OPENSSL_malloc(sizeof(CERT));
+	ret = (CERT *)malloc(sizeof(CERT));
 	if (ret == NULL) {
 		SSLerr(SSL_F_SSL_CERT_NEW, ERR_R_MALLOC_FAILURE);
 		return (NULL);
@@ -199,7 +195,7 @@ CERT
 	CERT *ret;
 	int i;
 
-	ret = (CERT *)OPENSSL_malloc(sizeof(CERT));
+	ret = (CERT *)malloc(sizeof(CERT));
 	if (ret == NULL) {
 		SSLerr(SSL_F_SSL_CERT_DUP, ERR_R_MALLOC_FAILURE);
 		return (NULL);
@@ -217,13 +213,11 @@ CERT
 	ret->export_mask_k = cert->export_mask_k;
 	ret->export_mask_a = cert->export_mask_a;
 
-#ifndef OPENSSL_NO_RSA
 	if (cert->rsa_tmp != NULL) {
 		RSA_up_ref(cert->rsa_tmp);
 		ret->rsa_tmp = cert->rsa_tmp;
 	}
 	ret->rsa_tmp_cb = cert->rsa_tmp_cb;
-#endif
 
 #ifndef OPENSSL_NO_DH
 	if (cert->dh_tmp != NULL) {
@@ -319,10 +313,8 @@ CERT
 #if !defined(OPENSSL_NO_DH) || !defined(OPENSSL_NO_ECDH)
 err:
 #endif
-#ifndef OPENSSL_NO_RSA
 	if (ret->rsa_tmp != NULL)
 		RSA_free(ret->rsa_tmp);
-#endif
 #ifndef OPENSSL_NO_DH
 	if (ret->dh_tmp != NULL)
 		DH_free(ret->dh_tmp);
@@ -352,22 +344,11 @@ ssl_cert_free(CERT *c)
 		return;
 
 	i = CRYPTO_add(&c->references, -1, CRYPTO_LOCK_SSL_CERT);
-#ifdef REF_PRINT
-	REF_PRINT("CERT", c);
-#endif
 	if (i > 0)
 		return;
-#ifdef REF_CHECK
-	if (i < 0) {
-		fprintf(stderr, "ssl_cert_free, bad reference count\n");
-		abort(); /* ok */
-	}
-#endif
 
-#ifndef OPENSSL_NO_RSA
 	if (c->rsa_tmp)
 		RSA_free(c->rsa_tmp);
-#endif
 #ifndef OPENSSL_NO_DH
 	if (c->dh_tmp)
 		DH_free(c->dh_tmp);
@@ -387,7 +368,7 @@ ssl_cert_free(CERT *c)
 			EVP_PKEY_free(c->pkeys[i].publickey);
 #endif
 	}
-	OPENSSL_free(c);
+	free(c);
 }
 
 int
@@ -422,7 +403,7 @@ SESS_CERT
 {
 	SESS_CERT *ret;
 
-	ret = OPENSSL_malloc(sizeof *ret);
+	ret = malloc(sizeof *ret);
 	if (ret == NULL) {
 		SSLerr(SSL_F_SSL_SESS_CERT_NEW, ERR_R_MALLOC_FAILURE);
 		return NULL;
@@ -444,17 +425,8 @@ ssl_sess_cert_free(SESS_CERT *sc)
 		return;
 
 	i = CRYPTO_add(&sc->references, -1, CRYPTO_LOCK_SSL_SESS_CERT);
-#ifdef REF_PRINT
-	REF_PRINT("SESS_CERT", sc);
-#endif
 	if (i > 0)
 		return;
-#ifdef REF_CHECK
-	if (i < 0) {
-		fprintf(stderr, "ssl_sess_cert_free, bad reference count\n");
-		abort(); /* ok */
-	}
-#endif
 
 	/* i == 0 */
 	if (sc->cert_chain != NULL)
@@ -470,10 +442,8 @@ ssl_sess_cert_free(SESS_CERT *sc)
 #endif
 	}
 
-#ifndef OPENSSL_NO_RSA
 	if (sc->peer_rsa_tmp != NULL)
 		RSA_free(sc->peer_rsa_tmp);
-#endif
 #ifndef OPENSSL_NO_DH
 	if (sc->peer_dh_tmp != NULL)
 		DH_free(sc->peer_dh_tmp);
@@ -483,7 +453,7 @@ ssl_sess_cert_free(SESS_CERT *sc)
 		EC_KEY_free(sc->peer_ecdh_tmp);
 #endif
 
-	OPENSSL_free(sc);
+	free(sc);
 }
 
 int

@@ -149,7 +149,7 @@ static int do_esc_char(unsigned long c, unsigned char flags, char *do_quotes, ch
 		return 2;
 	}
 	if(chflgs & (ASN1_STRFLGS_ESC_CTRL|ASN1_STRFLGS_ESC_MSB)) {
-		(void) snprintf(tmphex, 11, "\\%02X", chtmp);
+		(void) snprintf(tmphex, sizeof tmphex, "\\%02X", chtmp);
 		if(!io_ch(arg, tmphex, 3)) return -1;
 		return 3;
 	}
@@ -278,12 +278,12 @@ static int do_dump(unsigned long lflags, char_io *io_ch, void *arg, ASN1_STRING 
 	t.type = str->type;
 	t.value.ptr = (char *)str;
 	der_len = i2d_ASN1_TYPE(&t, NULL);
-	der_buf = OPENSSL_malloc(der_len);
+	der_buf = malloc(der_len);
 	if(!der_buf) return -1;
 	p = der_buf;
 	i2d_ASN1_TYPE(&t, &p);
 	outlen = do_hex_dump(io_ch, arg, der_buf, der_len);
-	OPENSSL_free(der_buf);
+	free(der_buf);
 	if(outlen < 0) return -1;
 	return outlen + 1;
 }
@@ -405,8 +405,7 @@ static int do_name_ex(char_io *io_ch, void *arg, X509_NAME *n,
 	if(indent < 0) indent = 0;
 	outlen = indent;
 	if(!do_indent(io_ch, arg, indent)) return -1;
-	switch (flags & XN_FLAG_SEP_MASK)
-	{
+	switch (flags & XN_FLAG_SEP_MASK) {
 		case XN_FLAG_SEP_MULTILINE:
 		sep_dn = "\n";
 		sep_dn_len = 1;
@@ -526,8 +525,7 @@ int X509_NAME_print_ex(BIO *out, X509_NAME *nm, int indent, unsigned long flags)
 #ifndef OPENSSL_NO_FP_API
 int X509_NAME_print_ex_fp(FILE *fp, X509_NAME *nm, int indent, unsigned long flags)
 {
-	if(flags == XN_FLAG_COMPAT)
-		{
+	if(flags == XN_FLAG_COMPAT) {
 		BIO *btmp;
 		int ret;
 		btmp = BIO_new_fp(fp, BIO_NOCLOSE);

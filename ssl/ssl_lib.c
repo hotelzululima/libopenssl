@@ -142,9 +142,6 @@
  * OTHERWISE.
  */
 
-#ifdef REF_CHECK
-#  include <assert.h>
-#endif
 #include <stdio.h>
 #include "ssl_locl.h"
 #include "kssl_lcl.h"
@@ -200,18 +197,10 @@ SSL_clear(SSL *s)
 	s->hit = 0;
 	s->shutdown = 0;
 
-#if 0 /* Disabled since version 1.10 of this file (early return not
-       * needed because SSL_clear is not called when doing renegotiation) */
-	/* This is set if we are doing dynamic renegotiation so keep
-	 * the old cipher.  It is sort of a SSL_clear_lite :-) */
-	if (s->renegotiate)
-		return (1);
-#else
 	if (s->renegotiate) {
 		SSLerr(SSL_F_SSL_CLEAR, ERR_R_INTERNAL_ERROR);
 		return 0;
 	}
-#endif
 
 	s->type = 0;
 
@@ -281,7 +270,7 @@ SSL
 		return (NULL);
 	}
 
-	s = (SSL *)OPENSSL_malloc(sizeof(SSL));
+	s = (SSL *)malloc(sizeof(SSL));
 	if (s == NULL)
 		goto err;
 	memset(s, 0, sizeof(SSL));
@@ -380,7 +369,7 @@ err:
 			ssl_cert_free(s->cert);
 		if (s->ctx != NULL)
 			SSL_CTX_free(s->ctx); /* decrement reference count */
-		OPENSSL_free(s);
+		free(s);
 	}
 	SSLerr(SSL_F_SSL_NEW, ERR_R_MALLOC_FAILURE);
 	return (NULL);
@@ -503,17 +492,8 @@ SSL_free(SSL *s)
 		return;
 
 	i = CRYPTO_add(&s->references, -1, CRYPTO_LOCK_SSL);
-#ifdef REF_PRINT
-	REF_PRINT("SSL", s);
-#endif
 	if (i > 0)
 		return;
-#ifdef REF_CHECK
-	if (i < 0) {
-		fprintf(stderr, "SSL_free, bad reference count\n");
-		abort(); /* ok */
-	}
-#endif
 
 	if (s->param)
 		X509_VERIFY_PARAM_free(s->param);
@@ -558,24 +538,24 @@ SSL_free(SSL *s)
 
 #ifndef OPENSSL_NO_TLSEXT
 	if (s->tlsext_hostname)
-		OPENSSL_free(s->tlsext_hostname);
+		free(s->tlsext_hostname);
 	if (s->initial_ctx)
 		SSL_CTX_free(s->initial_ctx);
 #ifndef OPENSSL_NO_EC
 	if (s->tlsext_ecpointformatlist)
-		OPENSSL_free(s->tlsext_ecpointformatlist);
+		free(s->tlsext_ecpointformatlist);
 	if (s->tlsext_ellipticcurvelist)
-		OPENSSL_free(s->tlsext_ellipticcurvelist);
+		free(s->tlsext_ellipticcurvelist);
 #endif /* OPENSSL_NO_EC */
 	if (s->tlsext_opaque_prf_input)
-		OPENSSL_free(s->tlsext_opaque_prf_input);
+		free(s->tlsext_opaque_prf_input);
 	if (s->tlsext_ocsp_exts)
 		sk_X509_EXTENSION_pop_free(s->tlsext_ocsp_exts,
 	X509_EXTENSION_free);
 	if (s->tlsext_ocsp_ids)
 		sk_OCSP_RESPID_pop_free(s->tlsext_ocsp_ids, OCSP_RESPID_free);
 	if (s->tlsext_ocsp_resp)
-		OPENSSL_free(s->tlsext_ocsp_resp);
+		free(s->tlsext_ocsp_resp);
 #endif
 
 	if (s->client_CA != NULL)
@@ -594,7 +574,7 @@ SSL_free(SSL *s)
 
 #if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_NEXTPROTONEG)
 	if (s->next_proto_negotiated)
-		OPENSSL_free(s->next_proto_negotiated);
+		free(s->next_proto_negotiated);
 #endif
 
 #ifndef OPENSSL_NO_SRTP
@@ -602,7 +582,7 @@ SSL_free(SSL *s)
 		sk_SRTP_PROTECTION_PROFILE_free(s->srtp_profiles);
 #endif
 
-	OPENSSL_free(s);
+	free(s);
 }
 
 void
@@ -1703,7 +1683,7 @@ SSL_CTX
 		SSLerr(SSL_F_SSL_CTX_NEW, SSL_R_X509_VERIFICATION_SETUP_PROBLEMS);
 		goto err;
 	}
-	ret = (SSL_CTX *)OPENSSL_malloc(sizeof(SSL_CTX));
+	ret = (SSL_CTX *)malloc(sizeof(SSL_CTX));
 	if (ret == NULL)
 		goto err;
 
@@ -1862,7 +1842,7 @@ err2:
 #if 0
 static void
 SSL_COMP_free(SSL_COMP *comp)
-	{ OPENSSL_free(comp);
+	{ free(comp);
 }
 #endif
 
@@ -1875,17 +1855,8 @@ SSL_CTX_free(SSL_CTX *a)
 		return;
 
 	i = CRYPTO_add(&a->references, -1, CRYPTO_LOCK_SSL_CTX);
-#ifdef REF_PRINT
-	REF_PRINT("SSL_CTX", a);
-#endif
 	if (i > 0)
 		return;
-#ifdef REF_CHECK
-	if (i < 0) {
-		fprintf(stderr, "SSL_CTX_free, bad reference count\n");
-		abort(); /* ok */
-	}
-#endif
 
 	if (a->param)
 		X509_VERIFY_PARAM_free(a->param);
@@ -1933,7 +1904,7 @@ SSL_CTX_free(SSL_CTX *a)
 
 #ifndef OPENSSL_NO_PSK
 	if (a->psk_identity_hint)
-		OPENSSL_free(a->psk_identity_hint);
+		free(a->psk_identity_hint);
 #endif
 #ifndef OPENSSL_NO_SRP
 	SSL_CTX_SRP_CTX_free(a);
@@ -1943,7 +1914,7 @@ SSL_CTX_free(SSL_CTX *a)
 		ENGINE_finish(a->client_cert_engine);
 #endif
 
-	OPENSSL_free(a);
+	free(a);
 }
 
 void
@@ -1999,13 +1970,9 @@ ssl_set_cert_masks(CERT *c, const SSL_CIPHER *cipher)
 
 	kl = SSL_C_EXPORT_PKEYLENGTH(cipher);
 
-#ifndef OPENSSL_NO_RSA
 	rsa_tmp = (c->rsa_tmp != NULL || c->rsa_tmp_cb != NULL);
 	rsa_tmp_export = (c->rsa_tmp_cb != NULL ||
 	(rsa_tmp && RSA_size(c->rsa_tmp)*8 <= kl));
-#else
-	rsa_tmp = rsa_tmp_export = 0;
-#endif
 #ifndef OPENSSL_NO_DH
 	dh_tmp = (c->dh_tmp != NULL || c->dh_tmp_cb != NULL);
 	dh_tmp_export = (c->dh_tmp_cb != NULL ||
@@ -2696,12 +2663,12 @@ ssl_clear_cipher_ctx(SSL *s)
 {
 	if (s->enc_read_ctx != NULL) {
 		EVP_CIPHER_CTX_cleanup(s->enc_read_ctx);
-		OPENSSL_free(s->enc_read_ctx);
+		free(s->enc_read_ctx);
 		s->enc_read_ctx = NULL;
 	}
 	if (s->enc_write_ctx != NULL) {
 		EVP_CIPHER_CTX_cleanup(s->enc_write_ctx);
-		OPENSSL_free(s->enc_write_ctx);
+		free(s->enc_write_ctx);
 		s->enc_write_ctx = NULL;
 	}
 #ifndef OPENSSL_NO_COMP
@@ -2814,9 +2781,6 @@ ssl_free_wbio_buffer(SSL *s)
 	if (s->bbio == s->wbio) {
 		/* remove buffering */
 		s->wbio = BIO_pop(s->wbio);
-#ifdef REF_CHECK /* not the usual REF_CHECK, but this avoids adding one more preprocessor symbol */
-		assert(s->wbio != NULL);
-#endif
 	}
 	BIO_free(s->bbio);
 	s->bbio = NULL;
@@ -3014,7 +2978,6 @@ SSL_want(const SSL *s)
  * \param cb the callback
  */
 
-#ifndef OPENSSL_NO_RSA
 void
 SSL_CTX_set_tmp_rsa_callback(SSL_CTX *ctx, RSA *(*cb)(SSL *ssl,
     int is_export,
@@ -3030,7 +2993,6 @@ int keylength))
 {
 	SSL_callback_ctrl(ssl, SSL_CTRL_SET_TMP_RSA_CB,(void (*)(void))cb);
 }
-#endif
 
 #ifdef DOXYGEN
 /*!
@@ -3095,7 +3057,7 @@ SSL_CTX_use_psk_identity_hint(SSL_CTX *ctx, const char *identity_hint)
 		return 0;
 	}
 	if (ctx->psk_identity_hint != NULL)
-		OPENSSL_free(ctx->psk_identity_hint);
+		free(ctx->psk_identity_hint);
 	if (identity_hint != NULL) {
 		ctx->psk_identity_hint = BUF_strdup(identity_hint);
 		if (ctx->psk_identity_hint == NULL)
@@ -3119,7 +3081,7 @@ SSL_use_psk_identity_hint(SSL *s, const char *identity_hint)
 		return 0;
 	}
 	if (s->session->psk_identity_hint != NULL)
-		OPENSSL_free(s->session->psk_identity_hint);
+		free(s->session->psk_identity_hint);
 	if (identity_hint != NULL) {
 		s->session->psk_identity_hint = BUF_strdup(identity_hint);
 		if (s->session->psk_identity_hint == NULL)

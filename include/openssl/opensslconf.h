@@ -8,6 +8,7 @@
 #ifndef OPENSSL_NO_CAMELLIA
 # define OPENSSL_NO_CAMELLIA
 #endif
+/*
 #ifndef OPENSSL_NO_DES
 # define OPENSSL_NO_DES
 #endif
@@ -17,21 +18,26 @@
 #ifndef OPENSSL_NO_DSA
 # define OPENSSL_NO_DSA
 #endif
+ */
 #ifndef OPENSSL_NO_EC_NISTP_64_GCC_128
 # define OPENSSL_NO_EC_NISTP_64_GCC_128
 #endif
+/*
 #ifndef OPENSSL_NO_ENGINE
 # define OPENSSL_NO_ENGINE
 #endif
+*/
 #ifndef OPENSSL_NO_GMP
 # define OPENSSL_NO_GMP
 #endif
 #ifndef OPENSSL_NO_GOST
 # define OPENSSL_NO_GOST
 #endif
+/*
 #ifndef OPENSSL_NO_IDEA
 # define OPENSSL_NO_IDEA
 #endif
+*/
 #ifndef OPENSSL_NO_JPAKE
 # define OPENSSL_NO_JPAKE
 #endif
@@ -41,6 +47,7 @@
 #ifndef OPENSSL_NO_MD2
 # define OPENSSL_NO_MD2
 #endif
+/*
 #ifndef OPENSSL_NO_MDC2
 # define OPENSSL_NO_MDC2
 #endif
@@ -53,6 +60,7 @@
 #ifndef OPENSSL_NO_RC5
 # define OPENSSL_NO_RC5
 #endif
+*/
 #ifndef OPENSSL_NO_RFC3779
 # define OPENSSL_NO_RFC3779
 #endif
@@ -280,7 +288,7 @@ YOU SHOULD NOT HAVE BOTH DES_RISC1 AND DES_RISC2 DEFINED!!!!!
    even newer MIPS CPU's, but at the moment one size fits all for
    optimization options.  Older Sparc's work better with only UNROLL, but
    there's no way to tell at compile time what it is you're running on */
- 
+
 #if defined( sun )		/* Newer Sparc's */
 #  define DES_PTR
 #  define DES_RISC1
