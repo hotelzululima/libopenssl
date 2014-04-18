@@ -5,12 +5,14 @@
 #include <openssl/aes.h>
 #include <openssl/asn1.h>
 #include <openssl/asn1_mac.h>
+#include <openssl/asn1t.h>
 #include <openssl/bio.h>
 #include <openssl/bn.h>
 #include <openssl/buffer.h>
 #include <openssl/comp.h>
 #include <openssl/conf.h>
 #include <openssl/crypto.h>
+#include <openssl/dso.h>
 #include <openssl/dtls1.h>
 #include <openssl/ecdh.h>
 #include <openssl/ecdsa.h>

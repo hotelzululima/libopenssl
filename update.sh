@@ -52,6 +52,8 @@ for i in e_os2.h \
 	crypto/srp/srp.h \
 	crypto/aes/aes.h \
 	crypto/modes/modes.h \
+	crypto/asn1/asn1t.h \
+	crypto/dso/dso.h \
 	crypto/bio/bio.h ; do
 	cp openbsd-src/lib/libssl/src/$i include/openssl
 done
@@ -67,7 +69,7 @@ for i in ssl/srtp.h \
 	cp openbsd-src/lib/libssl/src/$i ssl
 done
 
-pushd include
+(cd include
 	cp openssl.h.tpl openssl.h
 	for i in openssl/*.h; do
 		echo "#include <$i>" >> openssl.h;
@@ -78,7 +80,7 @@ pushd include
 			echo "opensslinclude_HEADERS += $i" >> Makefile.am
 		done
 	popd
-popd
+)
 
 for i in s3_meth.c s3_srvr.c s3_clnt.c s3_lib.c s3_enc.c s3_pkt.c s3_both.c \
 		s23_meth.c s23_srvr.c s23_clnt.c s23_lib.c s23_pkt.c \
@@ -93,12 +95,12 @@ do
 	cp openbsd-src/lib/libssl/src/ssl/$i ssl/
 done
 
-pushd ssl
+(cd ssl
 	cp Makefile.am.tpl Makefile.am
 	for i in *.c; do
 		echo "libssl_la_SOURCES += $i" >> Makefile.am
 	done
-popd
+)
 
 for i in crypto/cryptlib.h \
 	crypto/cryptlib.c \
@@ -119,12 +121,12 @@ do
 	cp openbsd-src/lib/libssl/src/$i crypto
 done
 
-pushd crypto
+(cd crypto
 	cp Makefile.am.tpl Makefile.am
 	for i in *.c; do
 		echo "libcrypto_la_SOURCES += $i" >> Makefile.am
 	done
-popd
+)
 
 mkdir -p crypto/aes
 for i in aes_misc.c aes_ecb.c aes_cfb.c aes_ofb.c \
@@ -133,8 +135,29 @@ do
 	cp openbsd-src/lib/libssl/src/crypto/aes/${i} crypto/aes
 done
 
-pushd crypto
-	for i in aes/*.c; do
-		echo "libcrypto_la_SOURCES += $i" >> Makefile.am
+mkdir -p crypto/asn1
+for i in a_object.c a_bitstr.c a_utctm.c a_gentm.c a_time.c a_int.c a_octet.c \
+	a_print.c a_type.c a_dup.c a_d2i_fp.c a_i2d_fp.c \
+	a_enum.c a_utf8.c a_sign.c a_digest.c a_verify.c a_mbstr.c a_strex.c \
+	x_algor.c x_val.c x_pubkey.c x_sig.c x_req.c x_attrib.c x_bignum.c \
+	x_long.c x_name.c x_x509.c x_x509a.c x_crl.c x_info.c x_spki.c nsseq.c \
+	x_nx509.c d2i_pu.c d2i_pr.c i2d_pu.c i2d_pr.c \
+	t_req.c t_x509.c t_x509a.c t_crl.c t_pkey.c t_spki.c t_bitst.c \
+	tasn_new.c tasn_fre.c tasn_enc.c tasn_dec.c tasn_utl.c tasn_typ.c \
+	tasn_prn.c ameth_lib.c \
+	f_int.c f_string.c n_pkey.c \
+	f_enum.c x_pkey.c a_bool.c x_exten.c bio_asn1.c bio_ndef.c asn_mime.c \
+	asn1_gen.c asn1_par.c asn1_lib.c asn1_err.c a_bytes.c a_strnid.c \
+	evp_asn1.c asn_pack.c p5_pbe.c p5_pbev2.c p8_pkey.c asn_moid.c \
+	asn1_locl.h charmap.h;
+do
+	cp openbsd-src/lib/libssl/src/crypto/asn1/${i} crypto/asn1
+done
+
+(cd crypto
+	for subdir in aes asn1; do
+		for i in $subdir/*.c; do
+			echo "libcrypto_la_SOURCES += $i" >> Makefile.am
+		done
 	done
-popd
+)
