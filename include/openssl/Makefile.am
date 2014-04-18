@@ -3,6 +3,7 @@ include $(top_srcdir)/Makefile.am.common
 opensslincludedir=$(includedir)/openssl
 
 opensslinclude_HEADERS =
+opensslinclude_HEADERS += aes.h
 opensslinclude_HEADERS += asn1.h
 opensslinclude_HEADERS += asn1_mac.h
 opensslinclude_HEADERS += bio.h
@@ -23,6 +24,7 @@ opensslinclude_HEADERS += krb5_asn.h
 opensslinclude_HEADERS += kssl.h
 opensslinclude_HEADERS += lhash.h
 opensslinclude_HEADERS += md5.h
+opensslinclude_HEADERS += modes.h
 opensslinclude_HEADERS += objects.h
 opensslinclude_HEADERS += obj_mac.h
 opensslinclude_HEADERS += ocsp.h

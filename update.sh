@@ -50,6 +50,8 @@ for i in e_os2.h \
 	crypto/conf/conf.h \
 	crypto/ocsp/ocsp.h \
 	crypto/srp/srp.h \
+	crypto/aes/aes.h \
+	crypto/modes/modes.h \
 	crypto/bio/bio.h ; do
 	cp openbsd-src/lib/libssl/src/$i include/openssl
 done
@@ -120,6 +122,19 @@ done
 pushd crypto
 	cp Makefile.am.tpl Makefile.am
 	for i in *.c; do
+		echo "libcrypto_la_SOURCES += $i" >> Makefile.am
+	done
+popd
+
+mkdir -p crypto/aes
+for i in aes_misc.c aes_ecb.c aes_cfb.c aes_ofb.c \
+	aes_ctr.c aes_ige.c aes_wrap.c aes_locl.h;
+do
+	cp openbsd-src/lib/libssl/src/crypto/aes/${i} crypto/aes
+done
+
+pushd crypto
+	for i in aes/*.c; do
 		echo "libcrypto_la_SOURCES += $i" >> Makefile.am
 	done
 popd
