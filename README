@@ -1,0 +1,7 @@
+This project repackages the OpenBSD fork of OpenSSL so it is buildable with
+autotools.
+
+The idea is to make OpenSSL builds and the OpenSSL fork in particular easier to
+test, hack on and contribute to for those used to autotools. It also
+reorganizes the source tree somewhat so that it is arranged like many other
+projects.

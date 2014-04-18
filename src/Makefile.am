@@ -1,0 +1,46 @@
+include $(top_srcdir)/Makefile.am.common
+
+lib_LTLIBRARIES = libopenssl.la
+
+libopenssl_la_SOURCES =
+libopenssl_la_SOURCES += bio_ssl.c
+libopenssl_la_SOURCES += d1_both.c
+libopenssl_la_SOURCES += d1_clnt.c
+libopenssl_la_SOURCES += d1_enc.c
+libopenssl_la_SOURCES += d1_lib.c
+libopenssl_la_SOURCES += d1_meth.c
+libopenssl_la_SOURCES += d1_pkt.c
+libopenssl_la_SOURCES += d1_srtp.c
+libopenssl_la_SOURCES += d1_srvr.c
+libopenssl_la_SOURCES += kssl.c
+libopenssl_la_SOURCES += s23_clnt.c
+libopenssl_la_SOURCES += s23_lib.c
+libopenssl_la_SOURCES += s23_meth.c
+libopenssl_la_SOURCES += s23_pkt.c
+libopenssl_la_SOURCES += s23_srvr.c
+libopenssl_la_SOURCES += s3_both.c
+libopenssl_la_SOURCES += s3_cbc.c
+libopenssl_la_SOURCES += s3_clnt.c
+libopenssl_la_SOURCES += s3_enc.c
+libopenssl_la_SOURCES += s3_lib.c
+libopenssl_la_SOURCES += s3_meth.c
+libopenssl_la_SOURCES += s3_pkt.c
+libopenssl_la_SOURCES += s3_srvr.c
+libopenssl_la_SOURCES += ssl_algs.c
+libopenssl_la_SOURCES += ssl_asn1.c
+libopenssl_la_SOURCES += ssl_cert.c
+libopenssl_la_SOURCES += ssl_ciph.c
+libopenssl_la_SOURCES += ssl_err2.c
+libopenssl_la_SOURCES += ssl_err.c
+libopenssl_la_SOURCES += ssl_lib.c
+libopenssl_la_SOURCES += ssl_rsa.c
+libopenssl_la_SOURCES += ssl_sess.c
+libopenssl_la_SOURCES += ssl_stat.c
+libopenssl_la_SOURCES += ssl_txt.c
+libopenssl_la_SOURCES += t1_clnt.c
+libopenssl_la_SOURCES += t1_enc.c
+libopenssl_la_SOURCES += t1_lib.c
+libopenssl_la_SOURCES += t1_meth.c
+libopenssl_la_SOURCES += t1_reneg.c
+libopenssl_la_SOURCES += t1_srvr.c
+libopenssl_la_SOURCES += tls_srp.c
