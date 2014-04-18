@@ -54,6 +54,7 @@ for i in e_os2.h \
 	crypto/modes/modes.h \
 	crypto/asn1/asn1t.h \
 	crypto/dso/dso.h \
+	crypto/bf/blowfish.h \
 	crypto/bio/bio.h ; do
 	cp openbsd-src/lib/libssl/src/$i include/openssl
 done
@@ -69,17 +70,11 @@ for i in ssl/srtp.h \
 	cp openbsd-src/lib/libssl/src/$i ssl
 done
 
-(cd include
-	cp openssl.h.tpl openssl.h
-	for i in openssl/*.h; do
-		echo "#include <$i>" >> openssl.h;
+(cd include/openssl
+	cp Makefile.am.tpl Makefile.am
+	for i in *.h; do
+		echo "opensslinclude_HEADERS += $i" >> Makefile.am
 	done
-	pushd openssl
-		cp Makefile.am.tpl Makefile.am
-		for i in *.h; do
-			echo "opensslinclude_HEADERS += $i" >> Makefile.am
-		done
-	popd
 )
 
 for i in s3_meth.c s3_srvr.c s3_clnt.c s3_lib.c s3_enc.c s3_pkt.c s3_both.c \
@@ -154,8 +149,41 @@ do
 	cp openbsd-src/lib/libssl/src/crypto/asn1/${i} crypto/asn1
 done
 
+mkdir -p crypto/bf
+for i in bf_skey.c bf_ecb.c bf_cfb64.c bf_ofb64.c bf_locl.h bf_pi.h;
+do
+	cp openbsd-src/lib/libssl/src/crypto/bf/${i} crypto/bf
+done
+
+mkdir -p crypto/bio
+for i in bio_lib.c bio_cb.c bio_err.c \
+	bss_mem.c bss_null.c bss_fd.c \
+	bss_file.c bss_sock.c bss_conn.c \
+	bf_null.c bf_buff.c b_print.c b_dump.c \
+	b_sock.c bss_acpt.c bf_nbio.c bss_log.c bss_bio.c \
+	bss_dgram.c;
+do
+	cp openbsd-src/lib/libssl/src/crypto/bio/${i} crypto/bio
+done
+
+mkdir -p crypto/bn
+for i in bn_add.c bn_div.c bn_exp.c bn_lib.c bn_ctx.c bn_mul.c bn_mod.c \
+	bn_print.c bn_rand.c bn_shift.c bn_word.c bn_blind.c \
+	bn_kron.c bn_sqrt.c bn_gcd.c bn_prime.c bn_err.c bn_sqr.c \
+	bn_recp.c bn_mont.c bn_mpi.c bn_exp2.c bn_gf2m.c bn_nist.c \
+	bn_depr.c bn_const.c bn_x931p.c bn_lcl.h bn_prime.h;
+do
+	cp openbsd-src/lib/libssl/src/crypto/bn/${i} crypto/bn
+done
+
+mkdir -p crypto/buffer
+for i in buffer.c buf_err.c buf_str.c;
+do
+	cp openbsd-src/lib/libssl/src/crypto/buffer/${i} crypto/buffer
+done
+
 (cd crypto
-	for subdir in aes asn1; do
+	for subdir in aes asn1 bf bio bn buffer; do
 		for i in $subdir/*.c; do
 			echo "libcrypto_la_SOURCES += $i" >> Makefile.am
 		done

@@ -8,6 +8,7 @@ opensslinclude_HEADERS += asn1.h
 opensslinclude_HEADERS += asn1_mac.h
 opensslinclude_HEADERS += asn1t.h
 opensslinclude_HEADERS += bio.h
+opensslinclude_HEADERS += blowfish.h
 opensslinclude_HEADERS += bn.h
 opensslinclude_HEADERS += buffer.h
 opensslinclude_HEADERS += comp.h
