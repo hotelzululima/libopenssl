@@ -1,5 +1,5 @@
 AC_INIT([libopenssl], [1.0.1])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC
 
@@ -11,7 +11,7 @@ AM_SILENT_RULES([yes])
 
 AC_CANONICAL_HOST
 case $host_os in
-	*linux*) CFLAGS="$CFLAGS -Dlinux -D_BSD_SOURCE -D_POSIX_SOURCE -D_GNU_SOURCE" ;;
+	*linux*) CFLAGS="$CFLAGS -D_BSD_SOURCE -D_POSIX_SOURCE -D_GNU_SOURCE" ;;
 	*solaris*) CFLAGS="$CFLAGS -D__EXTENSIONS__" ;;
 	*) ;;
 esac
