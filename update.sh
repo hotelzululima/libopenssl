@@ -55,7 +55,7 @@ copy_src ssl "s3_meth.c s3_srvr.c s3_clnt.c s3_lib.c s3_enc.c s3_pkt.c
 copy_src crypto "cryptlib.h cryptlib.c malloc-wrapper.c mem_clr.c mem_dbg.c cversion.c
 	ex_data.c cpt_err.c uid.c o_time.c o_time.h o_str.c o_init.c md32_common.h"
 
-crypto_subdirs=""
+crypto_subdirs=compat
 
 copy_crypt() {
 	copy_src crypto/$1 "$2"
@@ -184,7 +184,7 @@ copy_crypt rand "randfile.c rand_lib.c rand_err.c"
 
 copy_crypt rc2 "rc2_ecb.c rc2_skey.c rc2_cbc.c rc2cfb64.c rc2ofb64.c rc2_locl.h"
 
-copy_crypt rc4 "rc4_utl.c"
+copy_crypt rc4 "rc4_enc.c rc4_skey.c rc4_utl.c rc4_locl.h"
 
 copy_crypt ripemd "rmd_dgst.c rmd_one.c rmd_locl.h rmdconst.h"
 
