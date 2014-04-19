@@ -221,25 +221,25 @@ copy_crypt x509v3 "v3_bcons.c v3_bitst.c v3_conf.c v3_extku.c v3_ia5.c v3_lib.c
 
 (cd include/openssl
 	cp Makefile.am.tpl Makefile.am
-	for i in *.h; do
+	for i in `ls -1 *.h|sort`; do
 		echo "opensslinclude_HEADERS += $i" >> Makefile.am
 	done
 )
 
 (cd ssl
 	cp Makefile.am.tpl Makefile.am
-	for i in *.c; do
+	for i in `ls -1 *.c|sort`; do
 		echo "libssl_la_SOURCES += $i" >> Makefile.am
 	done
 )
 
 (cd crypto
 	cp Makefile.am.tpl Makefile.am
-	for i in *.c; do
+	for i in `ls -1 *.c|sort`; do
 		echo "libcrypto_la_SOURCES += $i" >> Makefile.am
 	done
 	for subdir in $crypto_subdirs; do
-		for i in $subdir/*.c; do
+		for i in `ls -1 $subdir/*.c|sort`; do
 			if [ $i != "des/ncbc_enc.c" ]; then
 				echo "libcrypto_la_SOURCES += $i" >> Makefile.am
 			fi
