@@ -33,7 +33,7 @@ copy_hdrs crypto "stack/stack.h lhash/lhash.h stack/safestack.h opensslv.h
 	bio/bio.h cast/cast.h cmac/cmac.h conf/conf_api.h des/des.h dh/dh.h
 	dsa/dsa.h cms/cms.h engine/engine.h ui/ui.h pkcs12/pkcs12.h ts/ts.h
 	md4/md4.h ripemd/ripemd.h whrlpool/whrlpool.h idea/idea.h mdc2/mdc2.h
-	rc2/rc2.h rc4/rc4.h rc5/rc5.h ui/ui_compat.h"
+	rc2/rc2.h rc4/rc4.h rc5/rc5.h ui/ui_compat.h txt_db/txt_db.h"
 
 copy_hdrs ssl "srtp.h ssl.h ssl2.h ssl3.h ssl23.h tls1.h dtls1.h kssl.h"
 
@@ -55,7 +55,7 @@ copy_src ssl "s3_meth.c s3_srvr.c s3_clnt.c s3_lib.c s3_enc.c s3_pkt.c
 copy_src crypto "cryptlib.h cryptlib.c malloc-wrapper.c mem_clr.c mem_dbg.c cversion.c
 	ex_data.c cpt_err.c o_time.c o_time.h o_str.c o_init.c md32_common.h"
 
-crypto_subdirs=compat
+crypto_subdirs=
 
 copy_crypt() {
 	copy_src crypto/$1 "$2"
@@ -201,7 +201,7 @@ copy_crypt ts "ts_err.c ts_req_utils.c ts_req_print.c ts_rsp_utils.c
 	ts_rsp_print.c ts_rsp_sign.c ts_rsp_verify.c ts_verify_ctx.c ts_lib.c
 	ts_conf.c ts_asn1.c"
 
-copy_crypt txt_db "txt_db.c txt_db.h"
+copy_crypt txt_db "txt_db.c"
 
 copy_crypt ui "ui_err.c ui_lib.c ui_openssl.c ui_util.c ui_compat.c ui_locl.h"
 
