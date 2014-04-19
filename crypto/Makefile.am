@@ -194,7 +194,6 @@ libcrypto_la_SOURCES += des/ede_cbcm_enc.c
 libcrypto_la_SOURCES += des/enc_read.c
 libcrypto_la_SOURCES += des/enc_writ.c
 libcrypto_la_SOURCES += des/fcrypt.c
-libcrypto_la_SOURCES += des/ncbc_enc.c
 libcrypto_la_SOURCES += des/ofb64ede.c
 libcrypto_la_SOURCES += des/ofb64enc.c
 libcrypto_la_SOURCES += des/ofb_enc.c

@@ -240,7 +240,9 @@ copy_crypt x509v3 "v3_bcons.c v3_bitst.c v3_conf.c v3_extku.c v3_ia5.c v3_lib.c
 	done
 	for subdir in $crypto_subdirs; do
 		for i in $subdir/*.c; do
-			echo "libcrypto_la_SOURCES += $i" >> Makefile.am
+			if [ $i != "des/ncbc_enc.c" ]; then
+				echo "libcrypto_la_SOURCES += $i" >> Makefile.am
+			fi
 		done
 	done
 )
