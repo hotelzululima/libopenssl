@@ -94,7 +94,7 @@ ASN1_TIME *ASN1_TIME_adj(ASN1_TIME *s, time_t t,
 	struct tm *ts;
 	struct tm data;
 
-	ts=OPENSSL_gmtime(&t,&data);
+	ts=gmtime_r(&t,&data);
 	if (ts == NULL) {
 		ASN1err(ASN1_F_ASN1_TIME_ADJ, ASN1_R_ERROR_GETTING_TIME);
 		return NULL;
@@ -147,10 +147,10 @@ ASN1_GENERALIZEDTIME *ASN1_TIME_to_generalizedtime(ASN1_TIME *t, ASN1_GENERALIZE
 	newlen = t->length + 2 + 1;
 	str = (char *)ret->data;
 	/* Work out the century and prepend */
-	if (t->data[0] >= '5') BUF_strlcpy(str, "19", newlen);
-	else BUF_strlcpy(str, "20", newlen);
+	if (t->data[0] >= '5') strlcpy(str, "19", newlen);
+	else strlcpy(str, "20", newlen);
 
-	BUF_strlcat(str, (char *)t->data, newlen);
+	strlcat(str, (char *)t->data, newlen);
 
 	return ret;
 }
