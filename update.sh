@@ -52,7 +52,7 @@ copy_src ssl "s3_meth.c s3_srvr.c s3_clnt.c s3_lib.c s3_enc.c s3_pkt.c
 	ssl_cert.c ssl_sess.c ssl_ciph.c ssl_stat.c ssl_rsa.c ssl_asn1.c ssl_txt.c
 	ssl_algs.c bio_ssl.c ssl_err.c kssl.c tls_srp.c t1_reneg.c s3_cbc.c"
 
-copy_src crypto "cryptlib.h cryptlib.c malloc-wrapper.c mem_dbg.c cversion.c
+copy_src crypto "cryptlib.h cryptlib.c malloc-wrapper.c mem_clr.c mem_dbg.c cversion.c
 	ex_data.c cpt_err.c uid.c o_time.c o_time.h o_str.c o_init.c md32_common.h"
 
 crypto_subdirs=""
@@ -62,7 +62,7 @@ copy_crypt() {
 	crypto_subdirs="$crypto_subdirs $1"
 }
 
-copy_crypt aes "aes_misc.c aes_ecb.c aes_cfb.c aes_ofb.c aes_ctr.c
+copy_crypt aes "aes_cbc.c aes_core.c aes_misc.c aes_ecb.c aes_cfb.c aes_ofb.c aes_ctr.c
 	aes_ige.c aes_wrap.c aes_locl.h"
 
 copy_crypt asn1 "a_object.c a_bitstr.c a_utctm.c a_gentm.c a_time.c
@@ -77,13 +77,13 @@ copy_crypt asn1 "a_object.c a_bitstr.c a_utctm.c a_gentm.c a_time.c
 	asn1_par.c asn1_lib.c asn1_err.c a_bytes.c a_strnid.c evp_asn1.c asn_pack.c
 	p5_pbe.c p5_pbev2.c p8_pkey.c asn_moid.c a_set.c asn1_locl.h charmap.h"
 
-copy_crypt bf "bf_skey.c bf_ecb.c bf_cfb64.c bf_ofb64.c bf_locl.h bf_pi.h"
+copy_crypt bf "bf_skey.c bf_ecb.c bf_enc.c bf_cfb64.c bf_ofb64.c bf_locl.h bf_pi.h"
 
 copy_crypt bio "bio_lib.c bio_cb.c bio_err.c bss_mem.c bss_null.c bss_fd.c
 	bss_file.c bss_sock.c bss_conn.c bf_null.c bf_buff.c b_print.c b_dump.c
 	b_sock.c bss_acpt.c bf_nbio.c bss_log.c bss_bio.c bss_dgram.c"
 
-copy_crypt bn "bn_add.c bn_div.c bn_exp.c bn_lib.c bn_ctx.c bn_mul.c
+copy_crypt bn "bn_add.c bn_asm.c bn_div.c bn_exp.c bn_lib.c bn_ctx.c bn_mul.c
 	bn_mod.c bn_print.c bn_rand.c bn_shift.c bn_word.c bn_blind.c bn_kron.c
 	bn_sqrt.c bn_gcd.c bn_prime.c bn_err.c bn_sqr.c bn_recp.c bn_mont.c
 	bn_mpi.c bn_exp2.c bn_gf2m.c bn_nist.c bn_depr.c bn_const.c bn_x931p.c
@@ -107,7 +107,7 @@ copy_crypt conf "conf_err.c conf_lib.c conf_api.c conf_def.c conf_mod.c
 copy_crypt des "cbc_cksm.c cbc_enc.c cfb64enc.c cfb_enc.c ecb3_enc.c
 	ecb_enc.c  enc_read.c enc_writ.c fcrypt.c ofb64enc.c ofb_enc.c  pcbc_enc.c
 	qud_cksm.c rand_key.c rpc_enc.c  set_key.c xcbc_enc.c str2key.c  cfb64ede.c
-	ofb64ede.c ede_cbcm_enc.c des_locl.h ncbc_enc.c des_ver.h rpc_des.h"
+	ofb64ede.c ede_cbcm_enc.c des_enc.c des_locl.h ncbc_enc.c des_ver.h rpc_des.h spr.h"
 
 copy_crypt dh "dh_asn1.c dh_gen.c dh_key.c dh_lib.c dh_check.c dh_err.c
 	dh_depr.c dh_ameth.c dh_pmeth.c dh_prn.c"
@@ -129,11 +129,11 @@ copy_crypt ecdsa "ecs_lib.c ecs_asn1.c ecs_ossl.c ecs_sign.c ecs_vrf.c
 	ecs_err.c ecs_locl.h"
 
 # Engine interface is disabled
-#copy_crypt engine "eng_err.c eng_lib.c eng_list.c eng_init.c eng_ctrl.c
-#	eng_table.c eng_pkey.c eng_fat.c eng_all.c tb_rsa.c tb_dsa.c tb_ecdsa.c
-#	tb_dh.c tb_ecdh.c tb_rand.c tb_store.c tb_cipher.c tb_digest.c tb_pkmeth.c
-#	tb_asnmth.c eng_openssl.c eng_cnf.c eng_dyn.c hw_cryptodev.c eng_rsax.c
-#	eng_rdrand.c eng_int.h"
+copy_crypt engine "eng_err.c eng_lib.c eng_list.c eng_init.c eng_ctrl.c
+	eng_table.c eng_pkey.c eng_fat.c eng_all.c tb_rsa.c tb_dsa.c tb_ecdsa.c
+	tb_dh.c tb_ecdh.c tb_rand.c tb_store.c tb_cipher.c tb_digest.c tb_pkmeth.c
+	tb_asnmth.c eng_openssl.c eng_cnf.c eng_dyn.c hw_cryptodev.c eng_rsax.c
+	eng_rdrand.c eng_int.h"
 
 copy_crypt err "err.c err_all.c err_prn.c"
 
@@ -205,7 +205,7 @@ copy_crypt txt_db "txt_db.c txt_db.h"
 
 copy_crypt ui "ui_err.c ui_lib.c ui_openssl.c ui_util.c ui_compat.c ui_locl.h"
 
-copy_crypt whrlpool "wp_dgst.c wp_locl.h"
+copy_crypt whrlpool "wp_block.c wp_dgst.c wp_locl.h"
 
 copy_crypt x509 "x509_def.c x509_d2.c x509_r2x.c x509_cmp.c x509_obj.c
 	x509_req.c x509spki.c x509_vfy.c x509_set.c x509cset.c x509rset.c
