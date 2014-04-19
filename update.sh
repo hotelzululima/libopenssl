@@ -53,7 +53,7 @@ copy_src ssl "s3_meth.c s3_srvr.c s3_clnt.c s3_lib.c s3_enc.c s3_pkt.c
 	ssl_algs.c bio_ssl.c ssl_err.c kssl.c tls_srp.c t1_reneg.c s3_cbc.c"
 
 copy_src crypto "cryptlib.h cryptlib.c malloc-wrapper.c mem_clr.c mem_dbg.c cversion.c
-	ex_data.c cpt_err.c uid.c o_time.c o_time.h o_str.c o_init.c md32_common.h"
+	ex_data.c cpt_err.c o_time.c o_time.h o_str.c o_init.c md32_common.h"
 
 crypto_subdirs=compat
 

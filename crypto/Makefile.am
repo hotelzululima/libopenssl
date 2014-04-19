@@ -17,7 +17,6 @@ libcrypto_la_SOURCES += mem_dbg.c
 libcrypto_la_SOURCES += o_init.c
 libcrypto_la_SOURCES += o_str.c
 libcrypto_la_SOURCES += o_time.c
-libcrypto_la_SOURCES += uid.c
 libcrypto_la_SOURCES += compat/arc4random.c
 libcrypto_la_SOURCES += compat/explicit_bzero.c
 libcrypto_la_SOURCES += compat/strlcat.c
