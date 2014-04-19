@@ -15,6 +15,8 @@ endif
 if NO_STRLCPY
 libcrypto_la_SOURCES += compat/strlcpy.c
 endif
+libcrypto_la_SOURCES += compat/arc4random.c
+libcrypto_la_SOURCES += compat/explicit_bzero.c
 libcrypto_la_SOURCES += cpt_err.c
 libcrypto_la_SOURCES += cryptlib.c
 libcrypto_la_SOURCES += cversion.c
