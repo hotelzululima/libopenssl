@@ -58,13 +58,13 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <unistd.h>
 #include "cryptlib.h"
 #include <openssl/bio.h>
 #include <netdb.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#ifndef OPENSSL_NO_SOCK
 
 #define SOCKET_PROTOCOL IPPROTO_TCP
 
@@ -610,4 +610,3 @@ BIO_new_connect(char *str)
 	}
 }
 
-#endif

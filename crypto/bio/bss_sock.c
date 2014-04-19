@@ -58,10 +58,10 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <unistd.h>
 #include "cryptlib.h"
 #include <sys/socket.h>
 
-#ifndef OPENSSL_NO_SOCK
 
 #include <openssl/bio.h>
 
@@ -239,4 +239,3 @@ BIO_sock_non_fatal_error(int err)
 	return (0);
 }
 
-#endif  /* #ifndef OPENSSL_NO_SOCK */

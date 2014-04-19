@@ -18,10 +18,9 @@ copy_hdrs() {
 }
 
 cp openbsd-src/lib/libssl/src/LICENSE COPYING
-cp openbsd-src/lib/libssl/src/ACKNOWLEDGMENTS AUTHORS
 cp openbsd-src/lib/libssl/src/CHANGES ChangeLog
 
-cp openbsd-src/lib/libssl/src/e_os.h crypto
+cp openbsd-src/lib/libcrypto/crypto/arch/amd64/opensslconf.h include/openssl
 cp openbsd-src/lib/libssl/src/e_os2.h include/openssl
 
 copy_hdrs crypto "stack/stack.h lhash/lhash.h stack/safestack.h opensslv.h
@@ -39,9 +38,6 @@ copy_hdrs crypto "stack/stack.h lhash/lhash.h stack/safestack.h opensslv.h
 copy_hdrs ssl "srtp.h ssl.h ssl2.h ssl3.h ssl23.h tls1.h dtls1.h kssl.h"
 
 sed -ie 's/__attribute__((__bounded__.*;/;/' include/openssl/bio.h
-
-mkdir -p crypto/ec
-cp ./openbsd-src/lib/libssl/src/crypto/ec/ec_lcl.h crypto/ec/
 
 for i in ssl/srtp.h \
 	ssl/kssl_lcl.h \
@@ -79,7 +75,7 @@ copy_crypt asn1 "a_object.c a_bitstr.c a_utctm.c a_gentm.c a_time.c
 	tasn_typ.c tasn_prn.c ameth_lib.c f_int.c f_string.c n_pkey.c f_enum.c
 	x_pkey.c a_bool.c x_exten.c bio_asn1.c bio_ndef.c asn_mime.c asn1_gen.c
 	asn1_par.c asn1_lib.c asn1_err.c a_bytes.c a_strnid.c evp_asn1.c asn_pack.c
-	p5_pbe.c p5_pbev2.c p8_pkey.c asn_moid.c asn1_locl.h charmap.h"
+	p5_pbe.c p5_pbev2.c p8_pkey.c asn_moid.c a_set.c asn1_locl.h charmap.h"
 
 copy_crypt bf "bf_skey.c bf_ecb.c bf_cfb64.c bf_ofb64.c bf_locl.h bf_pi.h"
 
@@ -100,8 +96,8 @@ copy_crypt cast "c_skey.c c_ecb.c c_enc.c c_cfb64.c c_ofb64.c cast_lcl.h
 
 copy_crypt cmac "cmac.c cm_ameth.c cm_pmeth.c"
 
-copy_crypt cms "cms_lib.c cms_asn1.c cms_att.c cms_io.c cms_smime.c cms_err.c
-	cms_sd.c cms_dd.c cms_cd.c cms_env.c cms_enc.c cms_ess.c cms_pwri.c cms.h cms_lcl.h"
+#copy_crypt cms "cms_lib.c cms_asn1.c cms_att.c cms_io.c cms_smime.c cms_err.c
+#	cms_sd.c cms_dd.c cms_cd.c cms_env.c cms_enc.c cms_ess.c cms_pwri.c cms.h cms_lcl.h"
 
 copy_crypt comp "comp_lib.c comp_err.c c_rle.c c_zlib.c"
 
@@ -125,7 +121,7 @@ copy_crypt dso "dso_dlfcn.c dso_err.c dso_lib.c dso_null.c dso_openssl.c"
 copy_crypt ec "ec_lib.c ecp_smpl.c ecp_mont.c ecp_nist.c ec_cvt.c ec_mult.c
 	ec_err.c ec_curve.c ec_check.c ec_print.c ec_asn1.c ec_key.c ec2_smpl.c
 	ec2_mult.c ec_ameth.c ec_pmeth.c eck_prn.c ecp_nistp224.c ecp_nistp256.c
-	ecp_nistp521.c ecp_nistputil.c ecp_oct.c ec2_oct.c ec_oct.c"
+	ecp_nistp521.c ecp_nistputil.c ecp_oct.c ec2_oct.c ec_oct.c ec_lcl.h"
 
 copy_crypt ecdh "ech_lib.c ech_ossl.c ech_key.c ech_err.c ech_locl.h"
 
@@ -184,8 +180,7 @@ copy_crypt pkcs7 "pk7_asn1.c pk7_lib.c pkcs7err.c pk7_doit.c pk7_smime.c
 
 copy_crypt pqueue "pqueue.c"
 
-copy_crypt rand "rc4_rand.c randfile.c rand_lib.c rand_err.c rand_egd.c
-	rand_unix.c"
+copy_crypt rand "randfile.c rand_lib.c rand_err.c"
 
 copy_crypt rc2 "rc2_ecb.c rc2_skey.c rc2_cbc.c rc2cfb64.c rc2ofb64.c rc2_locl.h"
 

@@ -1,94 +1,21 @@
-/* opensslconf.h */
-/* WARNING: Generated automatically from opensslconf.h.in by Configure. */
-
-/* OpenSSL was configured with the following options: */
-#ifndef OPENSSL_DOING_MAKEDEPEND
-
-
-#ifndef OPENSSL_NO_CAMELLIA
 # define OPENSSL_NO_CAMELLIA
-#endif
-/*
-#ifndef OPENSSL_NO_DES
-# define OPENSSL_NO_DES
-#endif
-#ifndef OPENSSL_NO_DH
-# define OPENSSL_NO_DH
-#endif
-#ifndef OPENSSL_NO_DSA
-# define OPENSSL_NO_DSA
-#endif
- */
-#ifndef OPENSSL_NO_EC_NISTP_64_GCC_128
 # define OPENSSL_NO_EC_NISTP_64_GCC_128
-#endif
-#ifndef OPENSSL_NO_ENGINE
-# define OPENSSL_NO_ENGINE
-#endif
-#ifndef OPENSSL_NO_GMP
+# define OPENSSL_NO_CMS
 # define OPENSSL_NO_GMP
-#endif
-#ifndef OPENSSL_NO_GOST
 # define OPENSSL_NO_GOST
-#endif
-/*
-#ifndef OPENSSL_NO_IDEA
-# define OPENSSL_NO_IDEA
-#endif
-*/
-#ifndef OPENSSL_NO_JPAKE
 # define OPENSSL_NO_JPAKE
-#endif
-#ifndef OPENSSL_NO_KRB5
 # define OPENSSL_NO_KRB5
-#endif
-#ifndef OPENSSL_NO_MD2
 # define OPENSSL_NO_MD2
-#endif
-/*
-#ifndef OPENSSL_NO_MDC2
-# define OPENSSL_NO_MDC2
-#endif
-#ifndef OPENSSL_NO_RC2
-# define OPENSSL_NO_RC2
-#endif
-#ifndef OPENSSL_NO_RC4
-# define OPENSSL_NO_RC4
-#endif
-#ifndef OPENSSL_NO_RC5
 # define OPENSSL_NO_RC5
-#endif
-*/
-#ifndef OPENSSL_NO_RFC3779
 # define OPENSSL_NO_RFC3779
-#endif
-#ifndef OPENSSL_NO_SCTP
 # define OPENSSL_NO_SCTP
-#endif
-#ifndef OPENSSL_NO_SEED
 # define OPENSSL_NO_SEED
-#endif
-#ifndef OPENSSL_NO_SSL2
+# define OPENSSL_NO_SRP
 # define OPENSSL_NO_SSL2
-#endif
-#ifndef OPENSSL_NO_SSL3
-# define OPENSSL_NO_SSL3
-#endif
-#ifndef OPENSSL_NO_STORE
 # define OPENSSL_NO_STORE
-#endif
 
-#endif /* OPENSSL_DOING_MAKEDEPEND */
-
-#ifndef OPENSSL_THREADS
 # define OPENSSL_THREADS
-#endif
-#ifndef OPENSSL_NO_HW
-# define OPENSSL_NO_HW
-#endif
-#ifndef OPENSSL_NO_DYNAMIC_ENGINE
 # define OPENSSL_NO_DYNAMIC_ENGINE
-#endif
 
 /* The OPENSSL_NO_* macros are also defined as NO_* if the application
    asks for it.  This is a transient feature that is provided for those
@@ -98,29 +25,17 @@
 # if defined(OPENSSL_NO_CAMELLIA) && !defined(NO_CAMELLIA)
 #  define NO_CAMELLIA
 # endif
-# if defined(OPENSSL_NO_DES) && !defined(NO_DES)
-#  define NO_DES
-# endif
-# if defined(OPENSSL_NO_DH) && !defined(NO_DH)
-#  define NO_DH
-# endif
-# if defined(OPENSSL_NO_DSA) && !defined(NO_DSA)
-#  define NO_DSA
-# endif
 # if defined(OPENSSL_NO_EC_NISTP_64_GCC_128) && !defined(NO_EC_NISTP_64_GCC_128)
 #  define NO_EC_NISTP_64_GCC_128
 # endif
-# if defined(OPENSSL_NO_ENGINE) && !defined(NO_ENGINE)
-#  define NO_ENGINE
+# if defined(OPENSSL_NO_CMS) && !defined(NO_CMS)
+#  define NO_CMS
 # endif
 # if defined(OPENSSL_NO_GMP) && !defined(NO_GMP)
 #  define NO_GMP
 # endif
 # if defined(OPENSSL_NO_GOST) && !defined(NO_GOST)
 #  define NO_GOST
-# endif
-# if defined(OPENSSL_NO_IDEA) && !defined(NO_IDEA)
-#  define NO_IDEA
 # endif
 # if defined(OPENSSL_NO_JPAKE) && !defined(NO_JPAKE)
 #  define NO_JPAKE
@@ -130,15 +45,6 @@
 # endif
 # if defined(OPENSSL_NO_MD2) && !defined(NO_MD2)
 #  define NO_MD2
-# endif
-# if defined(OPENSSL_NO_MDC2) && !defined(NO_MDC2)
-#  define NO_MDC2
-# endif
-# if defined(OPENSSL_NO_RC2) && !defined(NO_RC2)
-#  define NO_RC2
-# endif
-# if defined(OPENSSL_NO_RC4) && !defined(NO_RC4)
-#  define NO_RC4
 # endif
 # if defined(OPENSSL_NO_RC5) && !defined(NO_RC5)
 #  define NO_RC5
@@ -152,29 +58,25 @@
 # if defined(OPENSSL_NO_SEED) && !defined(NO_SEED)
 #  define NO_SEED
 # endif
+# if defined(OPENSSL_NO_SRP) && !defined(NO_SRP)
+#  define NO_SRP
+# endif
 # if defined(OPENSSL_NO_SSL2) && !defined(NO_SSL2)
 #  define NO_SSL2
-# endif
-# if defined(OPENSSL_NO_SSL3) && !defined(NO_SSL3)
-#  define NO_SSL3
 # endif
 # if defined(OPENSSL_NO_STORE) && !defined(NO_STORE)
 #  define NO_STORE
 # endif
 #endif
 
-#define OPENSSL_CPUID_OBJ
-
 /* crypto/opensslconf.h.in */
 
 /* Generate 80386 code? */
 #undef I386_ONLY
 
-#if !(defined(VMS) || defined(__VMS)) /* VMS uses logical names instead */
 #if defined(HEADER_CRYPTLIB_H) && !defined(OPENSSLDIR)
-#define ENGINESDIR "/home/brent/projects/feedhopper/builds/linux.x86_64/lib/engines"
-#define OPENSSLDIR "/home/brent/projects/feedhopper/builds/linux.x86_64/ssl"
-#endif
+#define ENGINESDIR "/usr/lib/engines"
+#define OPENSSLDIR "/etc/ssl"
 #endif
 
 #undef OPENSSL_UNISTD
@@ -286,7 +188,7 @@ YOU SHOULD NOT HAVE BOTH DES_RISC1 AND DES_RISC2 DEFINED!!!!!
    even newer MIPS CPU's, but at the moment one size fits all for
    optimization options.  Older Sparc's work better with only UNROLL, but
    there's no way to tell at compile time what it is you're running on */
-
+ 
 #if defined( sun )		/* Newer Sparc's */
 #  define DES_PTR
 #  define DES_RISC1
